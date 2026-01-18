@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.cos.dao.EvaluateInfoMapper">
+
+    <!-- 分页获取面试评价信息 -->
+    <select id="queryPage" resultType="java.util.LinkedHashMap">
+        SELECT
+        ai.*,
+        ei2.name as enterpriseName,
+        ei2.images as enterpriseImages,
+        ei2.abbreviation,
+        ei2.nature,
+        ed.logo,
+        ei.name as expertName,
+        ei.images as expertImages,
+        pi.post_name,
+        pi.address,
+        pi.experience,
+        pi.responsibility,
+        pi.academic,
+        pi.work_time,
+        pi.work_hour,
+        pi.work_address,
+        pi.work_require,
+        pi.salary,
+        pi.welfare
+        FROM
+        evaluate_info ai
+        left join expert_info ei on
+        (ei.id = ai.user_id)
+        left join post_info pi on (pi.id = ai.post_id)
+        left join enterprise_info ei2 on
+        (ei2.id = pi.enterprise_id)
+        left join enterprise_detail ed on
+        (ed.enterprise_id = ei2.id)
+        WHERE
+        1 = 1
+        <if test="evaluateInfo.enterpriseName != null and evaluateInfo.enterpriseName != ''">
+            AND ei2.name LIKE CONCAT('%',#{evaluateInfo.enterpriseName},'%')
+        </if>
+        <if test="evaluateInfo.abbreviation != null and evaluateInfo.abbreviation != ''">
+            AND ei2.abbreviation LIKE CONCAT('%',#{evaluateInfo.abbreviation},'%')
+        </if>
+        <if test="evaluateInfo.expertName != null and evaluateInfo.expertName != ''">
+            AND ei.name LIKE CONCAT('%',#{evaluateInfo.expertName},'%')
+        </if>
+        <if test="evaluateInfo.expertId != null and evaluateInfo.expertId != ''">
+            AND ei.user_id = #{evaluateInfo.expertId}
+        </if>
+        <if test="evaluateInfo.enterpriseId != null and evaluateInfo.enterpriseId != ''">
+            AND ei2.user_id = #{evaluateInfo.enterpriseId}
+        </if>
+        ORDER BY
+        ai.create_date DESC
+    </select>
+</mapper>

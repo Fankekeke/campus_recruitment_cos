@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.cos.dao.AiInterviewMapper">
+
+    <!-- 分页获取AI面试记录信息 -->
+    <select id="queryPage" resultType="java.util.LinkedHashMap">
+        SELECT
+        ai.*,
+        ei2.name as enterpriseName,
+        ei2.images as enterpriseImages,
+        ei2.abbreviation,
+        ei2.nature,
+        ed.logo,
+        ei.name as expertName,
+        ei.images as expertImages,
+        pi.post_name,
+        pi.address,
+        pi.experience,
+        pi.responsibility,
+        pi.academic,
+        pi.work_time,
+        pi.work_hour,
+        pi.work_address,
+        pi.work_require,
+        pi.salary,
+        pi.welfare
+        FROM
+        ai_interview ai
+        left join expert_info ei on
+        (ei.id = ai.user_id)
+        left join post_info pi on (pi.id = ai.post_id)
+        left join enterprise_info ei2 on
+        (ei2.id = pi.enterprise_id)
+        left join enterprise_detail ed on
+        (ed.enterprise_id = ei2.id)
+        WHERE
+        1 = 1
+        <if test="aiInterview.enterpriseName != null and aiInterview.enterpriseName != ''">
+            AND ei2.name LIKE CONCAT('%',#{aiInterview.enterpriseName},'%')
+        </if>
+        <if test="aiInterview.abbreviation != null and aiInterview.abbreviation != ''">
+            AND ei2.abbreviation LIKE CONCAT('%',#{aiInterview.abbreviation},'%')
+        </if>
+        <if test="aiInterview.expertName != null and aiInterview.expertName != ''">
+            AND ei.name LIKE CONCAT('%',#{aiInterview.expertName},'%')
+        </if>
+        <if test="aiInterview.expertId != null and aiInterview.expertId != ''">
+            AND ei.user_id = #{aiInterview.expertId}
+        </if>
+        <if test="aiInterview.enterpriseId != null and aiInterview.enterpriseId != ''">
+            AND ei2.user_id = #{aiInterview.enterpriseId}
+        </if>
+        ORDER BY
+        ai.completion_time DESC
+    </select>
+</mapper>
