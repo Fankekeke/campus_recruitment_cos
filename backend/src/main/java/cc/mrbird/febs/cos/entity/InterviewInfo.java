@@ -71,4 +71,10 @@ public class InterviewInfo implements Serializable {
 
     @TableField(exist = false)
     private String expertName;
+
+    @TableField(exist = false)
+    private Integer month;
+
+    @TableField(exist = false)
+    private Integer day;
 }

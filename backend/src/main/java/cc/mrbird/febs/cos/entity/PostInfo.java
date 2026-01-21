@@ -54,7 +54,7 @@ public class PostInfo implements Serializable {
     private String responsibility;
 
     /**
-     * 学历要求（1.小学 2.初中 3.高中 4.大专 5.本科 6.研究生）
+     * 学历要求（1.小学 2.初中 3.高中 4.大专 5.本科 6.硕士 7.博士 8.不限）
      */
     private Integer academic;
 

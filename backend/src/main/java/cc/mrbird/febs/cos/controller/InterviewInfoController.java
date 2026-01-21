@@ -189,4 +189,76 @@ public class InterviewInfoController {
     public R deleteByIds(@PathVariable("ids") List<Integer> ids) {
         return R.ok(interviewInfoService.removeByIds(ids));
     }
+
+    /**
+     * 年统计
+     *
+     * @param date 年份
+     * @return 结果
+     */
+    @GetMapping("/statistics/year")
+    public R selectStoreStatisticsByYear(String date) {
+        return R.ok(interviewInfoService.selectStoreStatisticsByYear(date));
+    }
+
+    /**
+     * 月统计
+     *
+     * @param date 日期
+     * @return 结果
+     */
+    @GetMapping("/statistics/month")
+    public R selectStoreStatisticsByMonth(String date) {
+        return R.ok(interviewInfoService.selectStoreStatisticsByMonth(date));
+    }
+
+    /**
+     * 统计评价占比
+     *
+     * @return 评价占比
+     */
+    @GetMapping("/queryEvaluateRate")
+    public R queryEvaluateRate() {
+        return R.ok(interviewInfoService.queryEvaluateRate());
+    }
+
+    /**
+     * 区域数量占比
+     *
+     * @return 区域岗位数量占比
+     */
+    @GetMapping("/queryAreaScenicNumRate")
+    public R queryAreaScenicNumRate() {
+        return R.ok(interviewInfoService.queryAreaScenicNumRate());
+    }
+
+    /**
+     * 等级占比
+     *
+     * @return 岗位等级占比
+     */
+    @GetMapping("/queryScenicLevelRate")
+    public R queryScenicLevelRate() {
+        return R.ok(interviewInfoService.queryScenicLevelRate());
+    }
+
+    /**
+     * 薪资分布占比
+     *
+     * @return 价格分布占比
+     */
+    @GetMapping("/queryPriceStepRate")
+    public R queryPriceStepRate() {
+        return R.ok(interviewInfoService.queryPriceStepRate());
+    }
+
+    /**
+     * 要求词云
+     *
+     * @return 订单词云
+     */
+    @GetMapping("/queryOrderWordCloud")
+    public R queryOrderWordCloud() {
+        return R.ok(interviewInfoService.queryOrderWordCloud());
+    }
 }

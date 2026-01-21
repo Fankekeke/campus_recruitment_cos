@@ -1,5 +1,6 @@
 package cc.mrbird.febs.cos.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
@@ -50,6 +51,12 @@ public class AiInterview implements Serializable {
     private String completionTime;
 
     /**
+     * 分数
+     */
+    @TableField(exist = false)
+    private Integer score;
+
+    /**
      * 回答分析
      */
     private String aiRemark;
@@ -64,4 +71,9 @@ public class AiInterview implements Serializable {
     private String expertId;
     @TableField(exist = false)
     private String enterpriseId;
+    @TableField(exist = false)
+    private Integer month;
+
+    @TableField(exist = false)
+    private Integer day;
 }
