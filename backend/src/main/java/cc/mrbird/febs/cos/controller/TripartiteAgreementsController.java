@@ -37,7 +37,7 @@ public class TripartiteAgreementsController {
      */
     @GetMapping("/page")
     public R page(Page<TripartiteAgreements> page, TripartiteAgreements tripartiteAgreements) {
-        return R.ok();
+        return R.ok(tripartiteAgreementsService.queryPage(page, tripartiteAgreements));
     }
 
     /**

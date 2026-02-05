@@ -40,7 +40,7 @@ public class EmploymentDestinationsController {
      */
     @GetMapping("/page")
     public R page(Page<EmploymentDestinations> page, EmploymentDestinations employmentDestinations) {
-        return R.ok();
+        return R.ok(employmentDestinationsService.queryPage(page, employmentDestinations));
     }
 
     /**

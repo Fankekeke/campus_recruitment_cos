@@ -38,7 +38,7 @@ public class EmploymentEvidenceController {
      */
     @GetMapping("/page")
     public R page(Page<EmploymentEvidence> page, EmploymentEvidence employmentEvidence) {
-        return R.ok();
+        return R.ok(employmentEvidenceService.queryPage(page, employmentEvidence));
     }
 
     /**
