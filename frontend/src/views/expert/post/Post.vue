@@ -119,6 +119,15 @@
       </div>
     </a-col>
 
+    <div style="text-align: center; margin-top: 20px;">
+      <a-pagination
+        v-model="pagination.current"
+        :page-size="pagination.pageSize"
+        :total="pagination.total"
+        @change="handlePageChange"
+      />
+    </div>
+
     <!-- 岗位详情弹窗 -->
     <rent-view
       :pluralismShow="rentView.visiable"
@@ -251,6 +260,11 @@ export default {
   components: { RentView },
   data () {
     return {
+      pagination: {
+        current: 1,       // 当前页码
+        pageSize: 9,     // 每页显示条数
+        total: 0          // 总记录数
+      },
       form: this.$form.createForm(this),
       rentList: [],
       collectList: [],
@@ -355,7 +369,19 @@ export default {
         this.aiInterviewModal.recordingStatus = 'paused'
       }
     },
+    // 页码切换
+    handlePageChange(page, pageSize) {
+      this.pagination.current = page;
+      this.pagination.pageSize = pageSize;
+      this.selectRentList(); // 重新加载数据
+    },
 
+    // 每页条数变更
+    handlePageSizeChange(current, size) {
+      this.pagination.current = 1; // 重置到第一页
+      this.pagination.pageSize = size;
+      this.selectRentList(); // 重新加载数据
+    },
     // 继续录音
     resumeRecording () {
       if (this.aiInterviewModal.mediaRecorder &&
@@ -512,12 +538,6 @@ export default {
       return welfareStr.split(/[,\s，、]/).filter(tag => tag.trim())
     },
 
-    // 重置搜索条件
-    resetSearch () {
-      this.queryParams = {}
-      this.selectRentList()
-    },
-
     // 检查是否已收藏
     checkCollect (furnitureId) {
       if (this.collectList.length === 0) {
@@ -555,10 +575,18 @@ export default {
     },
 
     // 搜索功能
-    search () {
+    search() {
+      this.pagination.current = 1; // 重置到第一页
       this.selectRentList({
         ...this.queryParams
-      })
+      });
+    },
+
+    // 重置搜索条件
+    resetSearch() {
+      this.queryParams = {};
+      this.pagination.current = 1; // 重置到第一页
+      this.selectRentList();
     },
 
     // 查看岗位详情
@@ -604,13 +632,20 @@ export default {
     },
 
     // 获取岗位列表
-    selectRentList (params = {}) {
-      params.delFlag = 1
-      params.size = 9999
-      params.userId = this.currentUser.userId
-      this.$get('/cos/post-info/selectPostRecommend', { ...params }).then((r) => {
-        this.rentList = r.data.data.records
-      })
+    selectRentList(params = {}) {
+      // 合并分页参数
+      const pageParams = {
+        delFlag: 1,
+        size: this.pagination.pageSize,   // 每页大小
+        current: this.pagination.current, // 当前页码
+        userId: this.currentUser.userId
+      };
+
+      // 发送请求
+      this.$get('/cos/post-info/selectPostRecommend', { ...pageParams, ...params }).then((r) => {
+        this.rentList = r.data.data.records;         // 岗位列表数据
+        this.pagination.total = r.data.data.total;   // 更新总记录数
+      });
     },
 
     // 开始AI视频面试
@@ -768,7 +803,6 @@ export default {
 /* 薪资部分 */
 .salary-section {
   text-align: right;
-  margin-bottom: 15px;
 }
 
 .salary {

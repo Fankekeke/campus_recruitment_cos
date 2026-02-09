@@ -34,6 +34,15 @@ public interface PostInfoMapper extends BaseMapper<PostInfo> {
      */
     IPage<PostInfo> selectPostRecommend(Page<PostInfo> page, @Param("postInfo") PostInfo postInfo);
 
+
+    /**
+     * 固定岗位推荐
+     *
+     * @param postInfo 岗位信息
+     * @return 结果
+     */
+    List<PostInfo> selectPostRecommendFix(@Param("postInfo") PostInfo postInfo);
+
     /**
      * 根据id查询岗位信息
      *

@@ -1,6 +1,6 @@
 
 <template>
-  <a-row :gutter="[24, 24]" class="user-container">
+  <a-row :gutter="[24, 24]" class="user-container" style="width: 500px">
     <!-- 左侧 Tabs 容器 -->
     <a-col :xs="24" :sm="24" :md="24" class="tabs-column">
       <a-tabs default-active-key="1" class="user-tabs">
@@ -202,10 +202,9 @@
 <script>import { mapState } from 'vuex'
 import moment from 'moment'
 
-
 export default {
   name: 'User',
-  data() {
+  data () {
     return {
       employmentForm: this.$form.createForm(this),
       loading: false,
@@ -223,202 +222,220 @@ export default {
       agreementInfo: null, // 存储当前三方协议信息
       agreementFileList: [],
       agreementPreviewVisible: false,
-      agreementPreviewImage: '',
+      agreementPreviewImage: ''
     }
   },
-  mounted() {
-    this.loadEmploymentInfo();
-    this.loadMaterialInfo();
-    this.loadAgreementInfo();
+  computed: {
+    ...mapState({
+      currentUser: state => state.account.user
+    })
+  },
+  mounted () {
+    this.loadEmploymentInfo()
+    this.loadMaterialInfo()
+    this.loadAgreementInfo()
   },
   methods: {
     // 加载就业去向信息
-    loadEmploymentInfo() {
-      this.$get(`/cos/employment-destinations/queryByUser/${this.currentUser.userId}`).then((r) => {
-        this.employmentInfo = r.data.data;
+    loadEmploymentInfo () {
+      this.$get(`/cos/employment-destinations/queryByUser`, {userId: this.currentUser.userId}).then((r) => {
+        this.employmentInfo = r.data.data
         if (this.employmentInfo) {
-          this.setEmploymentFormValues(this.employmentInfo);
+          this.setEmploymentFormValues(this.employmentInfo)
         }
-      });
+      })
     },
 
     // 设置表单默认值
-    setEmploymentFormValues(info) {
-      const fields = ['type', 'companyName', 'organizationCode', 'city'];
-      const obj = {};
+    setEmploymentFormValues (info) {
+      const fields = ['type', 'companyName', 'organizationCode', 'city']
+      const obj = {}
       fields.forEach((field) => {
-        this.employmentForm.getFieldDecorator(field);
-        obj[field] = info[field];
-      });
-      this.employmentForm.setFieldsValue(obj);
+        this.employmentForm.getFieldDecorator(field)
+        obj[field] = info[field]
+      })
+      this.employmentForm.setFieldsValue(obj)
     },
 
     // 提交就业去向信息
-    handleEmploymentSubmit() {
+    handleEmploymentSubmit () {
       this.employmentForm.validateFields((err, values) => {
         if (!err) {
-          this.loading = true;
-          const url = this.employmentInfo ? '/cos/employment-destinations/update' : '/cos/employment-destinations/add';
+          this.loading = true
+          const url = this.employmentInfo ? '/cos/employment-destinations/update' : '/cos/employment-destinations/add'
           this.$post(url, {
             ...values,
-            userId: this.currentUser.userId,
-            id: this.employmentInfo?.id || null,
+            studentId: this.currentUser.userId,
+            id: this.employmentInfo != null ? this.employmentInfo.id : null
           }).then(() => {
-            this.$message.success(this.employmentInfo ? '修改成功' : '添加成功');
-            this.loading = false;
-            this.loadEmploymentInfo(); // 重新加载数据
+            this.$message.success(this.employmentInfo ? '修改成功' : '添加成功')
+            this.loading = false
+            this.loadEmploymentInfo() // 重新加载数据
           }).catch(() => {
-            this.loading = false;
-          });
+            this.loading = false
+          })
         }
-      });
+      })
     },
 
     // 加载就业证明材料信息
-    loadMaterialInfo() {
-      this.$get(`/cos/employment-evidence/queryByUser/${this.currentUser.userId}`).then((r) => {
-        this.materialInfo = r.data.data;
+    loadMaterialInfo () {
+      this.$get(`/cos/employment-evidence/queryByUser`, {userId: this.currentUser.userId}).then((r) => {
+        this.materialInfo = r.data.data
         if (this.materialInfo) {
-          this.setMaterialFormValues(this.materialInfo);
+          this.setMaterialFormValues(this.materialInfo)
           this.materialFileList = [
             {
               uid: '-1',
               name: this.materialInfo.fileName,
               status: 'done',
-              url: this.materialInfo.fileUrl,
-            },
-          ];
+              url: this.materialInfo.fileUrl
+            }
+          ]
         }
-      });
+      })
     },
 
     // 设置表单默认值
-    setMaterialFormValues(info) {
-      const fields = ['materialType', 'remark'];
-      const obj = {};
+    setMaterialFormValues (info) {
+      const fields = ['materialType', 'remark']
+      const obj = {}
       fields.forEach((field) => {
-        this.materialForm.getFieldDecorator(field);
-        obj[field] = info[field];
-      });
-      this.materialForm.setFieldsValue(obj);
+        this.materialForm.getFieldDecorator(field)
+        obj[field] = info[field]
+      })
+      this.materialForm.setFieldsValue(obj)
     },
 
     // 处理文件上传变化
-    materialHandleChange({ fileList }) {
-      this.materialFileList = fileList;
+    materialHandleChange ({ fileList }) {
+      this.materialFileList = fileList
     },
 
     // 文件预览
-    handleMaterialPreview(file) {
-      this.materialPreviewImage = file.url || file.preview;
-      this.materialPreviewVisible = true;
+    handleMaterialPreview (file) {
+      this.materialPreviewImage = file.url || file.preview
+      this.materialPreviewVisible = true
     },
 
     // 关闭预览弹窗
-    handleMaterialCancel() {
-      this.materialPreviewVisible = false;
+    handleMaterialCancel () {
+      this.materialPreviewVisible = false
     },
 
     // 提交就业证明材料
-    handleMaterialSubmit() {
+    handleMaterialSubmit () {
       this.materialForm.validateFields((err, values) => {
         if (!err) {
-          this.materialLoading = true;
-          const fileUrl = this.materialFileList[0]?.response?.data || this.materialFileList[0]?.url;
-          const fileName = this.materialFileList[0]?.name;
+          this.materialLoading = true
+          const fileUrl = this.materialFileList[0]
+            ? (this.materialFileList[0].response
+              ? this.materialFileList[0].response.data
+              : this.materialFileList[0].url)
+            : null
 
-          const url = this.materialInfo ? '/cos/employment-evidence/update' : '/cos/employment-evidence/add';
+          const fileName = this.materialFileList[0] ? this.materialFileList[0].name : null
+
+          const url = this.materialInfo ? '/cos/employment-evidence/update' : '/cos/employment-evidence/add'
           this.$post(url, {
             ...values,
-            userId: this.currentUser.userId,
-            id: this.materialInfo?.id || null,
+            studentId: this.currentUser.userId,
+            id: this.materialInfo ? this.materialInfo.id : null,
             fileUrl,
-            fileName,
+            fileName
           }).then(() => {
-            this.$message.success(this.materialInfo ? '修改成功' : '添加成功');
-            this.materialLoading = false;
-            this.loadMaterialInfo(); // 重新加载数据
+            this.$message.success(this.materialInfo ? '修改成功' : '添加成功')
+            this.materialLoading = false
+            this.loadMaterialInfo() // 重新加载数据
           }).catch(() => {
-            this.materialLoading = false;
-          });
+            this.materialLoading = false
+          })
         }
-      });
+      })
     },
 
     // 加载三方协议信息
-    loadAgreementInfo() {
-      this.$get(`/cos/tripartite-agreements/queryByUser/${this.currentUser.userId}`).then((r) => {
-        this.agreementInfo = r.data.data;
+    loadAgreementInfo () {
+      this.$get(`/cos/tripartite-agreements/queryByUser`, {userId: this.currentUser.userId}).then((r) => {
+        this.agreementInfo = r.data.data
         if (this.agreementInfo) {
-          this.setAgreementFormValues(this.agreementInfo);
+          this.setAgreementFormValues(this.agreementInfo)
           this.agreementFileList = [
             {
               uid: '-1',
               name: this.agreementInfo.fileName,
               status: 'done',
-              url: this.agreementInfo.fileUrl,
-            },
-          ];
+              url: this.agreementInfo.fileUrl
+            }
+          ]
         }
-      });
+      })
     },
 
     // 设置表单默认值
-    setAgreementFormValues(info) {
-      const fields = ['agreementNo', 'enterpriseName', 'signDate'];
-      const obj = {};
+    setAgreementFormValues (info) {
+      const fields = ['agreementNo', 'enterpriseName', 'signDate']
+      const obj = {}
       fields.forEach((field) => {
-        this.agreementForm.getFieldDecorator(field);
-        obj[field] = info[field];
-      });
-      this.agreementForm.setFieldsValue(obj);
+        this.agreementForm.getFieldDecorator(field)
+        obj[field] = info[field]
+      })
+      this.agreementForm.setFieldsValue(obj)
     },
 
     // 处理文件上传变化
-    agreementHandleChange({ fileList }) {
-      this.agreementFileList = fileList;
+    agreementHandleChange ({ fileList }) {
+      this.agreementFileList = fileList
     },
 
     // 文件预览
-    handleAgreementPreview(file) {
-      this.agreementPreviewImage = file.url || file.preview;
-      this.agreementPreviewVisible = true;
+    handleAgreementPreview (file) {
+      this.agreementPreviewImage = file.url || file.preview
+      this.agreementPreviewVisible = true
     },
 
     // 关闭预览弹窗
-    handleAgreementCancel() {
-      this.agreementPreviewVisible = false;
+    handleAgreementCancel () {
+      this.agreementPreviewVisible = false
     },
 
     // 提交三方协议信息
     handleAgreementSubmit() {
       this.agreementForm.validateFields((err, values) => {
         if (!err) {
-          this.agreementLoading = true;
-          const fileUrl = this.agreementFileList[0]?.response?.data || this.agreementFileList[0]?.url;
-          const fileName = this.agreementFileList[0]?.name;
+          this.agreementLoading = true
 
-          const url = this.agreementInfo ? '/cos/tripartite-agreements/update' : '/cos/tripartite-agreements/add';
+          const fileUrl = this.agreementFileList[0]
+            ? (this.agreementFileList[0].response
+              ? this.agreementFileList[0].response.data
+              : this.agreementFileList[0].url)
+            : null
+
+          const fileName = this.agreementFileList[0] ? this.agreementFileList[0].name : null
+
+          const url = this.agreementInfo
+            ? '/cos/tripartite-agreements/update'
+            : '/cos/tripartite-agreements/add'
+
           this.$post(url, {
             ...values,
-            userId: this.currentUser.userId,
-            id: this.agreementInfo?.id || null,
+            studentId: this.currentUser.userId,
+            id: this.agreementInfo ? this.agreementInfo.id : null,
             fileUrl,
-            fileName,
+            fileName
           }).then(() => {
-            this.$message.success(this.agreementInfo ? '修改成功' : '添加成功');
-            this.agreementLoading = false;
-            this.loadAgreementInfo(); // 重新加载数据
+            this.$message.success(this.agreementInfo ? '修改成功' : '添加成功')
+            this.agreementLoading = false
+            this.loadAgreementInfo() // 重新加载数据
           }).catch(() => {
-            this.agreementLoading = false;
-          });
+            this.agreementLoading = false
+          })
         }
-      });
-    },
+      })
+    }
 
-
-  },
-};
+  }
+}
 </script>
 
 <style scoped>.user-tabs {

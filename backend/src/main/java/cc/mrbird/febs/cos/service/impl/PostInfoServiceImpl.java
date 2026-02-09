@@ -79,7 +79,7 @@ public class PostInfoServiceImpl extends ServiceImpl<PostInfoMapper, PostInfo> i
 
         // 如果没有用户画像，按默认顺序返回所有岗位
         if (expertInfo == null) {
-            return buildPagedResult(allPostInfoList, page);
+            return buildPagedResult(allPostInfoList, page, allPostInfoListFix.getTotal(), allPostInfoListFix.getCurrent());
         }
 
         // 对用户画像中的关键词进行分词
@@ -105,25 +105,26 @@ public class PostInfoServiceImpl extends ServiceImpl<PostInfoMapper, PostInfo> i
                 .collect(Collectors.toList());
 
         // 构建分页结果
-        return buildPagedResult(rankedPosts, page);
+        return buildPagedResult(rankedPosts, page, allPostInfoListFix.getTotal(), allPostInfoListFix.getCurrent());
     }
 
-    private IPage<PostInfo> buildPagedResult(List<PostInfo> allData, Page<PostInfo> page) {
+    private IPage<PostInfo> buildPagedResult(List<PostInfo> allData, Page<PostInfo> page, long total, long current) {
         IPage<PostInfo> resultPage = new Page<>();
-        resultPage.setCurrent(page.getCurrent());
+        resultPage.setCurrent(current);
         resultPage.setSize(page.getSize());
-        resultPage.setTotal(allData.size());
+        resultPage.setTotal(total);
 
         // 分页截取数据
-        int startIndex = (int) ((page.getCurrent() - 1) * page.getSize());
-        int endIndex = Math.min(startIndex + (int) page.getSize(), allData.size());
-
-        if (startIndex < allData.size()) {
-            List<PostInfo> pagedData = allData.subList(startIndex, endIndex);
-            resultPage.setRecords(pagedData);
-        } else {
-            resultPage.setRecords(Collections.emptyList());
-        }
+//        int startIndex = (int) ((page.getCurrent() - 1) * page.getSize());
+//        int endIndex = Math.min(startIndex + (int) page.getSize(), allData.size());
+//
+//        if (startIndex < allData.size()) {
+//            List<PostInfo> pagedData = allData.subList(startIndex, endIndex);
+//            resultPage.setRecords(pagedData);
+//        } else {
+//            resultPage.setRecords(Collections.emptyList());
+//        }
+        resultPage.setRecords(allData);
         return resultPage;
     }
 
@@ -260,7 +261,7 @@ public class PostInfoServiceImpl extends ServiceImpl<PostInfoMapper, PostInfo> i
 
         // 取前10个最佳匹配
         List<Integer> ids = rankedPosts.stream()
-                .limit(10)
+                .limit(6)
                 .map(PostInfo::getId)
                 .collect(Collectors.toList());
 

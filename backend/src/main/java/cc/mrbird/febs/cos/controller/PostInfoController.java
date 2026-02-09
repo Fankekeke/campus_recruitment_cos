@@ -17,9 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -117,6 +115,24 @@ public class PostInfoController {
         postInfo.setDelFlag(1);
         postInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
         return R.ok(postInfoService.save(postInfo));
+    }
+
+    /**
+     * 测试
+     *
+     * @return 结果
+     */
+    @GetMapping("/test")
+    public R test() {
+        List<PostInfo> list = postInfoService.list();
+        List<EnterpriseInfo> enterpriseInfoList = enterpriseInfoService.list();
+        List<Integer> enterpriseIds = enterpriseInfoList.stream().map(EnterpriseInfo::getId).collect(Collectors.toList());
+        Random random = new Random();
+        for (PostInfo postInfo : list) {
+            Integer enterpriseId = enterpriseIds.get(random.nextInt(enterpriseIds.size()));
+            postInfo.setEnterpriseId(enterpriseId);
+        }
+        return R.ok(postInfoService.updateBatchById(list));
     }
 
     /**
