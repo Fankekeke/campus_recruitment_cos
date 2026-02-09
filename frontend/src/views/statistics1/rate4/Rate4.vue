@@ -121,7 +121,7 @@ export default {
   },
   methods: {
     selectRate() {
-      this.$get(`/cos/scenic-order/queryPriceStepRate`).then((r) => {
+      this.$get(`/cos/interview-info/queryPriceStepRate`).then((r) => {
         this.priceData = r.data.data
         this.processData()
       }).catch(error => {

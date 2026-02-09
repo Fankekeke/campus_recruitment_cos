@@ -190,8 +190,8 @@ public class InterviewInfoServiceImpl extends ServiceImpl<InterviewInfoMapper, I
         result.put("orderPriceList", orderPriceList);
         result.put("orderNumList", orderNumList);
         result.put("outlayPriceList", outlayPriceList);
-        result.put("outlayNumList", orderNumList);
-//        result.put("outlayNumList", outlayNumList);
+//        result.put("outlayNumList", orderNumList);
+        result.put("outlayNumList", outlayNumList);
 
         // 岗位销量排行
         List<LinkedHashMap<String, Object>> saleRank = new ArrayList<>();
@@ -317,8 +317,8 @@ public class InterviewInfoServiceImpl extends ServiceImpl<InterviewInfoMapper, I
         result.put("orderPriceList", orderPriceList);
         result.put("orderNumList", orderNumList);
         result.put("outlayPriceList", outlayPriceList);
-        result.put("outlayNumList", orderNumList);
-//        result.put("outlayNumList", outlayNumList);
+//        result.put("outlayNumList", orderNumList);
+        result.put("outlayNumList", outlayNumList);
 
         result.put("dateList", dateTimeList);
         // 岗位销量排行
@@ -508,8 +508,8 @@ public class InterviewInfoServiceImpl extends ServiceImpl<InterviewInfoMapper, I
             // 如果前面没有匹配到，尝试提取前两个字符作为城市名（适用于直辖市等）
             if (address.length() >= 2) {
                 String potentialCity = address.substring(0, 2);
-                if (potentialCity.equals("北京") || potentialCity.equals("上海") ||
-                        potentialCity.equals("天津") || potentialCity.equals("重庆")) {
+                if ("北京".equals(potentialCity) || "上海".equals(potentialCity) ||
+                        "天津".equals(potentialCity) || "重庆".equals(potentialCity)) {
                     return potentialCity;
                 }
             }

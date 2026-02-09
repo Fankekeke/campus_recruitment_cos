@@ -61,7 +61,7 @@
   },
   methods: {
     selectRate() {
-      this.$get(`/cos/scenic-order/queryOrderWordCloud`).then((r) => {
+      this.$get(`/cos/interview-info/queryOrderWordCloud`).then((r) => {
         this.wordcloudData = r.data.data
         this.processData()
       }).catch(error => {

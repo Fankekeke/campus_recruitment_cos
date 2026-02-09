@@ -129,7 +129,7 @@ export default {
   },
   methods: {
     selectRate() {
-      this.$get(`/cos/scenic-order/queryAreaScenicNumRate`).then((r) => {
+      this.$get(`/cos/interview-info/queryAreaScenicNumRate`).then((r) => {
         this.provinceData = r.data.data
         this.processData()
       }).catch(error => {

@@ -123,7 +123,7 @@ export default {
   },
   methods: {
     selectRate() {
-      this.$get(`/cos/scenic-order/queryScenicLevelRate`).then((r) => {
+      this.$get(`/cos/interview-info/queryScenicLevelRate`).then((r) => {
         this.levelData = r.data.data
         this.processData()
       }).catch(error => {

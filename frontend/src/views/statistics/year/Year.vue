@@ -7,16 +7,13 @@
             <a-row :gutter="20">
               <a-col :span="8">
                 <a-select style="width: 100%" placeholder="选择年份" v-model="queryDate">
-                  <a-select-option value="2020">2020</a-select-option>
-                  <a-select-option value="2021">2021</a-select-option>
-                  <a-select-option value="2022">2022</a-select-option>
-                  <a-select-option value="2023">2023</a-select-option>
                   <a-select-option value="2024">2024</a-select-option>
                   <a-select-option value="2025">2025</a-select-option>
                   <a-select-option value="2026">2026</a-select-option>
                   <a-select-option value="2027">2027</a-select-option>
                   <a-select-option value="2028">2028</a-select-option>
                   <a-select-option value="2029">2029</a-select-option>
+                  <a-select-option value="2030">2030</a-select-option>
                 </a-select>
               </a-col>
               <a-col :span="1">
@@ -395,7 +392,7 @@ export default {
     },
     selectRate () {
       this.chartLoading = true
-      this.$get(`/cos/scenic-order/statistics/year`, {
+      this.$get(`/cos/interview-info/statistics/year`, {
         date: this.queryDate
       }).then((r) => {
         this.titleData.orderNum = r.data.orderNum

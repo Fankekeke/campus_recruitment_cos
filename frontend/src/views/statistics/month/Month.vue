@@ -388,7 +388,7 @@ export default {
     },
     selectRate () {
       this.chartLoading = true
-      this.$get(`/cos/scenic-order/statistics/month`, {
+      this.$get(`/cos/interview-info/statistics/month`, {
         date: moment(this.queryDate).format('YYYY-MM')
       }).then((r) => {
         this.titleData.orderNum = r.data.orderNum

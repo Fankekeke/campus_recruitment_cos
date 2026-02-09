@@ -110,7 +110,7 @@ export default {
   methods: {
     selectRate () {
       this.chartLoading = true
-      this.$get(`/cos/scenic-order/queryEvaluateRate`).then((r) => {
+      this.$get(`/cos/interview-info/queryEvaluateRate`).then((r) => {
         this.rateData = r.data.data
         this.processData()
         this.chartLoading = false
