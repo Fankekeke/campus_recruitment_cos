@@ -19,7 +19,7 @@
         <a-col :span="12">
           <div hoverable :bordered="false" style="width: 100%;margin-top: 25px">
             <a-skeleton active v-if="chartLoading" />
-            <p v-if="!chartLoading" style="font-weight: 650;font-size: 15px;margin-bottom: 8px;font-family: SimHei">此月内景点单量统计</p>
+            <p v-if="!chartLoading" style="font-weight: 650;font-size: 15px;margin-bottom: 8px;font-family: SimHei">此月内AI面试完成次数统计</p>
             <apexchart v-if="!chartLoading" type="radar" height="450" :options="chartOptions3" :series="series3"></apexchart>
           </div>
         </a-col>
@@ -28,7 +28,7 @@
             <a-col :span="12" style="margin-top: 70px">
               <a-card hoverable>
                 <a-row>
-                  <a-col :span="24" style="font-size: 13px;margin-bottom: 8px;font-family: SimHei">本月景区订单量</a-col>
+                  <a-col :span="24" style="font-size: 13px;margin-bottom: 8px;font-family: SimHei">本月面试订单总数</a-col>
                   <a-col :span="4"><a-icon type="arrow-up" style="font-size: 30px;margin-top: 3px"/></a-col>
                   <a-col :span="18" style="font-size: 28px;font-weight: 500;font-family: SimHei">
                     {{ titleData.orderNum }}
@@ -40,11 +40,11 @@
             <a-col :span="12" style="margin-top: 70px">
               <a-card hoverable>
                 <a-row>
-                  <a-col :span="24" style="font-size: 13px;margin-bottom: 8px;font-family: SimHei">本月景区总收益</a-col>
+                  <a-col :span="24" style="font-size: 13px;margin-bottom: 8px;font-family: SimHei">本月已完成面试订单数</a-col>
                   <a-col :span="4"><a-icon type="arrow-up" style="font-size: 30px;margin-top: 3px"/></a-col>
                   <a-col :span="18" style="font-size: 28px;font-weight: 500;font-family: SimHei">
                     {{ titleData.totalPrice }}
-                    <span style="font-size: 20px;margin-top: 3px">元</span>
+                    <span style="font-size: 20px;margin-top: 3px">单</span>
                   </a-col>
                 </a-row>
               </a-card>
@@ -52,7 +52,7 @@
             <a-col :span="12" style="margin-top: 70px">
               <a-card hoverable>
                 <a-row>
-                  <a-col :span="24" style="font-size: 13px;margin-bottom: 8px;font-family: SimHei">本月酒店订单量</a-col>
+                  <a-col :span="24" style="font-size: 13px;margin-bottom: 8px;font-family: SimHei">本月AI面试完成次数</a-col>
                   <a-col :span="4"><a-icon type="arrow-up" style="font-size: 30px;margin-top: 3px"/></a-col>
                   <a-col :span="18" style="font-size: 28px;font-weight: 500;font-family: SimHei">
                     {{ titleData.putNum }}
@@ -64,11 +64,11 @@
             <a-col :span="12" style="margin-top: 70px">
               <a-card hoverable>
                 <a-row>
-                  <a-col :span="24" style="font-size: 13px;margin-bottom: 8px;font-family: SimHei">本月酒店总收益</a-col>
+                  <a-col :span="24" style="font-size: 13px;margin-bottom: 8px;font-family: SimHei">本月AI面试平均评分</a-col>
                   <a-col :span="4"><a-icon type="arrow-up" style="font-size: 30px;margin-top: 3px"/></a-col>
                   <a-col :span="18" style="font-size: 28px;font-weight: 500;font-family: SimHei">
-                    {{ titleData.outlayPrice }}
-                    <span style="font-size: 20px;margin-top: 3px">元</span>
+                    {{ titleData.outlayPrice.toFixed(1) }}
+                    <span style="font-size: 20px;margin-top: 3px">分</span>
                   </a-col>
                 </a-row>
               </a-card>
@@ -79,7 +79,7 @@
           <a-col :span="12">
             <div hoverable :bordered="false" style="width: 100%">
               <a-skeleton active v-if="chartLoading" />
-              <p v-if="!chartLoading" style="font-weight: 650;font-size: 15px;margin-bottom: 8px;font-family: SimHei">景点销量排行</p>
+              <p v-if="!chartLoading" style="font-weight: 650;font-size: 15px;margin-bottom: 8px;font-family: SimHei">不同学历岗位数量分布</p>
               <apexchart v-if="!chartLoading" type="pie" height="350" :options="chartOptions4" :series="series4"></apexchart>
             </div>
           </a-col>
@@ -93,7 +93,7 @@
           <a-col :span="12">
             <div hoverable :bordered="false" style="width: 100%">
               <a-skeleton active v-if="chartLoading" />
-              <p v-if="!chartLoading" style="font-weight: 650;font-size: 15px;margin-bottom: 8px;font-family: SimHei">销售景点分类</p>
+              <p v-if="!chartLoading" style="font-weight: 650;font-size: 15px;margin-bottom: 8px;font-family: SimHei">各岗位已完成面试订单数量排行</p>
               <apexchart v-if="!chartLoading" type="pie" height="350" :options="chartOptions6" :series="series6"></apexchart>
             </div>
           </a-col>
@@ -101,21 +101,21 @@
         <a-col :span="24">
           <a-card hoverable :bordered="false" style="width: 100%">
             <a-skeleton active v-if="chartLoading" />
-            <p v-if="!chartLoading" style="font-weight: 650;font-size: 15px;margin-bottom: 8px;font-family: SimHei">此月内景点订单收益统计</p>
+            <p v-if="!chartLoading" style="font-weight: 650;font-size: 15px;margin-bottom: 8px;font-family: SimHei">此月内已完成面试订单数量统计</p>
             <apexchart v-if="!chartLoading" type="line" height="350" :options="chartOptions" :series="series"></apexchart>
           </a-card>
         </a-col>
         <a-col :span="24">
           <a-card hoverable :bordered="false" style="width: 100%">
             <a-skeleton active v-if="chartLoading" />
-            <p v-if="!chartLoading" style="font-weight: 650;font-size: 15px;margin-bottom: 8px;font-family: SimHei">此月内景点订单量统计</p>
+            <p v-if="!chartLoading" style="font-weight: 650;font-size: 15px;margin-bottom: 8px;font-family: SimHei">此月内面试订单总数统计</p>
             <apexchart v-if="!chartLoading" type="area" height="350" :options="chartOptions1" :series="series1"></apexchart>
           </a-card>
         </a-col>
         <a-col :span="24">
           <a-card hoverable :bordered="false" style="width: 100%">
             <a-skeleton active v-if="chartLoading" />
-            <p v-if="!chartLoading" style="font-weight: 650;font-size: 15px;margin-bottom: 8px;font-family: SimHei">此月内酒店单量统计</p>
+            <p v-if="!chartLoading" style="font-weight: 650;font-size: 15px;margin-bottom: 8px;font-family: SimHei">此月内AI面试平均评分统计</p>
             <apexchart v-if="!chartLoading" type="bar" height="350" :options="chartOptions2" :series="series2"></apexchart>
           </a-card>
         </a-col>

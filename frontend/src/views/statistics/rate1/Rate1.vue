@@ -1,11 +1,13 @@
-
 <template>
   <div class="rate-container" style="width: 100%;">
+
     <div class="chart-section">
-      <!-- 评分分布饼图 -->
+      <!-- 学历分布饼图 -->
       <div class="chart-card">
-        <h3>评分分布统计</h3>
+        <h3>学历分布统计</h3>
+        <a-skeleton v-if="chartLoading" active />
         <apexchart
+          v-else
           type="pie"
           :options="pieChartOptions"
           :series="pieSeries"
@@ -13,10 +15,12 @@
         ></apexchart>
       </div>
 
-      <!-- 评分趋势柱状图 -->
+      <!-- 学历分布柱状图 -->
       <div class="chart-card">
-        <h3>各评分区间统计</h3>
+        <h3>各学历人数统计</h3>
+        <a-skeleton v-if="chartLoading" active />
         <apexchart
+          v-else
           type="bar"
           :options="barChartOptions"
           :series="barSeries"
@@ -25,22 +29,23 @@
       </div>
     </div>
 
-    <!-- 右侧评分列表 -->
+    <!-- 右侧学历列表 -->
     <div class="list-section">
-      <h3>详细评分统计</h3>
-      <div class="score-list">
+      <h3>详细学历统计</h3>
+      <a-skeleton v-if="chartLoading" active :paragraph="{ rows: 5 }" />
+      <div v-else class="score-list">
         <div
-          v-for="item in rateData"
-          :key="item.score"
+          v-for="item in academicData"
+          :key="item.academic"
           class="score-item"
-          :class="{ 'highlight': item.num > 0 }"
+          :class="{ 'highlight': item.count > 0 }"
         >
-          <span class="score-label">评分 {{ item.score }}</span>
-          <span class="score-count">{{ item.num }} 次</span>
+          <span class="score-label">{{ item.academic }}</span>
+          <span class="score-count">{{ item.count }} 人</span>
           <div class="progress-bar">
             <div
               class="progress-fill"
-              :style="{ width: `${(item.num / maxCount) * 100}%` }"
+              :style="{ width: `${(item.count / maxCount) * 100}%` }"
             ></div>
           </div>
         </div>
@@ -50,132 +55,110 @@
 </template>
 
 <script>
-
 export default {
-  name: 'Rate1',
+  name: 'AcademicDistribution',
   data () {
     return {
-      rateData: [],
+      academicData: [],
       chartLoading: false,
       pieChartOptions: {
         chart: {
           id: 'pie-chart'
         },
-        labels: ['1-2星', '2-3星', '3-4星', '4-5星'],
+        labels: [], // 动态设置学历标签
         title: {
-          text: '评分区间分布'
+          text: '学历分布统计'
         },
-        responsive: [{
-          breakpoint: 480,
-          options: {
-            chart: {
-              width: 200
-            },
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }]
+        legend: {
+          position: 'bottom'
+        }
       },
-      pieSeries: [],
+      pieSeries: [], // 动态设置饼图数据
       barChartOptions: {
         chart: {
           id: 'bar-chart'
         },
         xaxis: {
-          categories: [],
+          categories: [], // 动态设置学历标签
           title: {
-            text: '评分'
+            text: '学历'
           }
         },
         yaxis: {
           title: {
-            text: '数量'
+            text: '人数'
           }
         },
         title: {
-          text: '各评分统计'
+          text: '各学历人数统计'
         }
       },
       barSeries: [{
-        name: '评价数量',
+        name: '人数',
         data: []
       }],
       maxCount: 0
     }
   },
   mounted () {
-    this.selectRate()
+    this.selectAcademicData()
   },
   methods: {
-    selectRate () {
-      this.chartLoading = true
+    selectAcademicData() {
+      this.chartLoading = true;
       this.$get(`/cos/interview-info/queryEvaluateRate`).then((r) => {
-        this.rateData = r.data.data
-        this.processData()
-        this.chartLoading = false
+        this.academicData = r.data.data;
+        this.processAcademicData();
+        setTimeout(() => {
+          this.chartLoading = false;
+        }, 500);
       }).catch(error => {
-        console.error('请求评分数据出错:', error)
-        this.chartLoading = false
-      })
+        console.error('请求学历数据出错:', error);
+        this.chartLoading = false;
+      });
     },
 
-    processData () {
-      // 计算评分区间分布
-      const ranges = {
-        '1-2星': 0,
-        '2-3星': 0,
-        '3-4星': 0,
-        '4-5星': 0
-      }
-
-      // 提取柱状图的x轴和y轴数据
-      const categories = []
-      const seriesData = []
+    processAcademicData() {
+      const labels = [];
+      const pieData = [];
+      const barCategories = [];
+      const barData = [];
 
       // 找到最大数量用于进度条显示
-      this.maxCount = Math.max(...this.rateData.map(item => item.num), 1)
+      this.maxCount = Math.max(...this.academicData.map(item => item.count), 1);
 
-      this.rateData.forEach(item => {
-        const score = item.score
-        if (score >= 1 && score <= 2) {
-          ranges['1-2星'] += item.num
-        } else if (score > 2 && score <= 3) {
-          ranges['2-3星'] += item.num
-        } else if (score > 3 && score <= 4) {
-          ranges['3-4星'] += item.num
-        } else if (score > 4 && score <= 5) {
-          ranges['4-5星'] += item.num
-        }
+      this.academicData.forEach(item => {
+        labels.push(item.academic);
+        pieData.push(item.count);
+        barCategories.push(item.academic);
+        barData.push(item.count);
+      });
 
-        // 添加到柱状图数据
-        categories.push(`${score}分`)
-        seriesData.push(item.num)
-      })
+      // 更新饼图配置
+      this.pieChartOptions = {
+        ...this.pieChartOptions,
+        labels: labels
+      };
 
-      // 设置饼图数据
-      this.pieSeries = [
-        ranges['1-2星'],
-        ranges['2-3星'],
-        ranges['3-4星'],
-        ranges['4-5星']
-      ]
+      this.pieSeries = pieData;
 
-      // 设置柱状图数据
+      // 更新柱状图配置
       this.barChartOptions = {
         ...this.barChartOptions,
         xaxis: {
-          categories: categories,
+          categories: barCategories,
           title: {
-            text: '评分'
+            text: '学历'
           }
         }
-      }
+      };
 
-      this.barSeries = [{
-        name: '评价数量',
-        data: seriesData
-      }]
+      this.barSeries = [
+        {
+          name: '人数',
+          data: barData
+        }
+      ];
     }
   }
 }

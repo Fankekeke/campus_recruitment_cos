@@ -76,9 +76,8 @@
               <div class="company-details">
                 <div class="company-name">{{ item.enterpriseName }}</div>
                 <div class="industry-hour">
-                  <span class="industry">{{ item.industryName || '未知行业' }}</span>
+                  <span class="industry">{{ item.nature || '未知行业' }}</span>
                   <span class="divider">|</span>
-                  <span class="work-hour">{{ item.workHour || '未知工时' }}</span>
                 </div>
               </div>
             </div>

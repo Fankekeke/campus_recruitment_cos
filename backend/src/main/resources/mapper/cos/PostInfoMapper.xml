@@ -85,6 +85,7 @@
         ei.images as enterpriseImages,
         ei.abbreviation,
         ei.nature,
+        ei.business_scope as businessScope,
         ed.logo
         from
         post_info pi
@@ -196,6 +197,7 @@
         ei.images as enterpriseImages,
         ei.abbreviation,
         ei.nature,
+        ei.business_scope as businessScope,
         ed.logo
         from
         post_info pi

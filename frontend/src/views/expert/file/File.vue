@@ -81,18 +81,16 @@
                 <!-- 文件上传 -->
                 <a-form-item label="上传文件">
                   <a-upload
-                    name="file"
+                    name="avatar"
                     action="http://127.0.0.1:9527/file/fileUpload/"
-                    list-type="picture-card"
                     :file-list="materialFileList"
                     @preview="handleMaterialPreview"
                     @change="materialHandleChange"
                     class="material-uploader"
                   >
-                    <div v-if="materialFileList.length < 1" class="upload-placeholder">
-                      <a-icon type="plus" />
+                    <a-button v-if="materialFileList.length < 1" class="upload-placeholder">
                       <div class="ant-upload-text">点击上传</div>
-                    </div>
+                    </a-button>
                   </a-upload>
                   <a-modal :visible="materialPreviewVisible" :footer="null" @cancel="handleMaterialCancel">
                     <img alt="材料预览" style="width: 100%" :src="materialPreviewImage" />
@@ -159,18 +157,16 @@
                 <!-- 协议扫描件上传 -->
                 <a-form-item label="协议扫描件">
                   <a-upload
-                    name="file"
+                    name="avatar"
                     action="http://127.0.0.1:9527/file/fileUpload/"
-                    list-type="picture-card"
                     :file-list="agreementFileList"
                     @preview="handleAgreementPreview"
                     @change="agreementHandleChange"
                     class="agreement-uploader"
                   >
-                    <div v-if="agreementFileList.length < 1" class="upload-placeholder">
-                      <a-icon type="plus" />
+                    <a-button v-if="agreementFileList.length < 1" class="upload-placeholder">
                       <div class="ant-upload-text">点击上传</div>
-                    </div>
+                    </a-button>
                   </a-upload>
                   <a-modal :visible="agreementPreviewVisible" :footer="null" @cancel="handleAgreementCancel">
                     <img alt="协议预览" style="width: 100%" :src="agreementPreviewImage" />
@@ -287,9 +283,9 @@ export default {
           this.materialFileList = [
             {
               uid: '-1',
-              name: this.materialInfo.fileName,
+              name: this.materialInfo.fileUrl,
               status: 'done',
-              url: this.materialInfo.fileUrl
+              url: 'http://127.0.0.1:9527/imagesWeb/' + this.materialInfo.fileUrl
             }
           ]
         }
@@ -325,15 +321,16 @@ export default {
 
     // 提交就业证明材料
     handleMaterialSubmit () {
+      if (this.materialFileList.length === 0) {
+        this.$message.error('请上传就业证明材料')
+        return false
+      }
       this.materialForm.validateFields((err, values) => {
         if (!err) {
           this.materialLoading = true
-          const fileUrl = this.materialFileList[0]
-            ? (this.materialFileList[0].response
-              ? this.materialFileList[0].response.data
-              : this.materialFileList[0].url)
-            : null
-
+          console.log(this.materialFileList[0])
+          const fileUrl = this.materialFileList[0].response
+          console.log(fileUrl)
           const fileName = this.materialFileList[0] ? this.materialFileList[0].name : null
 
           const url = this.materialInfo ? '/cos/employment-evidence/update' : '/cos/employment-evidence/add'
@@ -363,9 +360,9 @@ export default {
           this.agreementFileList = [
             {
               uid: '-1',
-              name: this.agreementInfo.fileName,
+              name: this.agreementInfo.fileUrl,
               status: 'done',
-              url: this.agreementInfo.fileUrl
+              url: 'http://127.0.0.1:9527/imagesWeb/' + this.agreementInfo.fileUrl
             }
           ]
         }
@@ -401,16 +398,15 @@ export default {
 
     // 提交三方协议信息
     handleAgreementSubmit() {
+      if (this.agreementFileList.length === 0) {
+        this.$message.error('请上传三方协议')
+        return false
+      }
       this.agreementForm.validateFields((err, values) => {
         if (!err) {
           this.agreementLoading = true
 
-          const fileUrl = this.agreementFileList[0]
-            ? (this.agreementFileList[0].response
-              ? this.agreementFileList[0].response.data
-              : this.agreementFileList[0].url)
-            : null
-
+          const fileUrl = this.agreementFileList[0].response
           const fileName = this.agreementFileList[0] ? this.agreementFileList[0].name : null
 
           const url = this.agreementInfo

@@ -4,47 +4,57 @@
     <div class="chart-area">
       <!-- 左侧图表区域 -->
       <div class="chart-section">
-        <!-- 折线图 -->
-        <div class="chart-card">
-          <h3>各省份景区数量统计</h3>
-          <apexchart
-            type="line"
-            :options="lineChartOptions"
-            :series="lineSeries"
-            height="400"
-          ></apexchart>
-        </div>
-
-        <!-- 柱状图 -->
-        <div class="chart-card">
-          <h3>各省份景区数量统计</h3>
-          <apexchart
-            type="bar"
-            :options="barChartOptions"
-            :series="barSeries"
-            height="400"
-          ></apexchart>
+        <!-- 数据加载完成后的图表 -->
+        <div>
+          <div class="chart-card">
+            <h3>岗位区域占比折线图</h3>
+            <a-skeleton v-if="loading" active />
+            <apexchart
+              v-else
+              type="line"
+              :options="lineChartOptions"
+              :series="lineSeries"
+              height="400"
+            ></apexchart>
+          </div>
+          <div class="chart-card">
+            <h3>岗位区域占比柱状图</h3>
+            <a-skeleton v-if="loading" active />
+            <apexchart
+              v-else
+              type="bar"
+              :options="barChartOptions"
+              :series="barSeries"
+              height="400"
+            ></apexchart>
+          </div>
         </div>
       </div>
 
       <!-- 右侧列表区域 -->
+
       <div class="list-section">
-        <h3>省份景区数量列表</h3>
-        <div class="province-list">
-          <div
-            v-for="(item, index) in provinceData"
-            :key="index"
-            class="province-item"
-          >
-            <div class="province-info">
-              <span class="province-name">{{ item.province }}</span>
-              <span class="province-count">{{ item.count }}</span>
-            </div>
-            <div class="progress-bar">
-              <div
-                class="progress-fill"
-                :style="{ width: `${(item.count / maxCount) * 100}%` }"
-              ></div>
+        <!-- 加载中 Skeleton -->
+        <a-skeleton v-if="loading" active />
+        <!-- 数据加载完成后的列表 -->
+        <div v-else>
+          <h3>岗位区域占比列表</h3>
+          <div class="province-list">
+            <div
+              v-for="(item, index) in provinceData"
+              :key="index"
+              class="province-item"
+            >
+              <div class="province-info">
+                <span class="province-name">{{ item.province }}</span>
+                <span class="province-count">{{ item.count }} ({{ item.percentage }}%)</span>
+              </div>
+              <div class="progress-bar">
+                <div
+                  class="progress-fill"
+                  :style="{ width: `${item.percentage}%` }"
+                ></div>
+              </div>
             </div>
           </div>
         </div>
@@ -57,8 +67,9 @@
 
 export default {
   name: 'Rate2',
-  data() {
+  data () {
     return {
+      loading: true, // 控制 Skeleton 显示
       provinceData: [],
       maxCount: 0,
       lineChartOptions: {
@@ -73,12 +84,8 @@ export default {
         },
         yaxis: {
           title: {
-            text: '景区数量'
+            text: '数量'
           }
-        },
-        title: {
-          text: '省份景区数量折线图',
-          align: 'left'
         },
         stroke: {
           curve: 'smooth'
@@ -88,7 +95,7 @@ export default {
         }
       },
       lineSeries: [{
-        name: '景区数量',
+        name: '数量',
         data: []
       }],
       barChartOptions: {
@@ -103,12 +110,8 @@ export default {
         },
         yaxis: {
           title: {
-            text: '景区数量'
+            text: '数量'
           }
-        },
-        title: {
-          text: '省份景区数量柱状图',
-          align: 'left'
         },
         plotOptions: {
           bar: {
@@ -119,27 +122,44 @@ export default {
         }
       },
       barSeries: [{
-        name: '景区数量',
+        name: '数量',
         data: []
       }]
     }
   },
-  mounted() {
+  mounted () {
     this.selectRate()
   },
   methods: {
-    selectRate() {
+    selectRate () {
+      this.loading = true // 开始加载时显示 Skeleton
       this.$get(`/cos/interview-info/queryAreaScenicNumRate`).then((r) => {
-        this.provinceData = r.data.data
+        this.provinceData = r.data.data.map(item => ({
+          province: item.city,
+          count: item.count,
+          percentage: item.percentage || 0
+        }))
         this.processData()
+        setTimeout(() => {
+          this.loading = false
+        }, 300) // 数据加载完成隐藏 Skeleton
       }).catch(error => {
-        console.error('请求省份景区数量数据出错:', error)
+        console.error('请求省份数量数据出错:', error)
+        this.loading = false // 出错时也隐藏 Skeleton
       })
     },
 
-    processData() {
-      // 按景区数量降序排序
+    processData () {
+      // 按岗位数量降序排序
       this.provinceData.sort((a, b) => b.count - a.count)
+
+      // 计算总量
+      const totalCount = this.provinceData.reduce((sum, item) => sum + item.count, 0)
+
+      // 动态计算百分比
+      this.provinceData.forEach(item => {
+        item.percentage = ((item.count / totalCount) * 100).toFixed(2)
+      })
 
       // 计算最大数量用于进度条
       this.maxCount = Math.max(...this.provinceData.map(item => item.count), 1)
@@ -154,12 +174,12 @@ export default {
         xaxis: {
           categories: provinces,
           title: {
-            text: '省份'
+            text: '城市'
           }
         }
       }
       this.lineSeries = [{
-        name: '景区数量',
+        name: '岗位数量',
         data: counts
       }]
 
@@ -169,12 +189,12 @@ export default {
         xaxis: {
           categories: provinces,
           title: {
-            text: '省份'
+            text: '城市'
           }
         }
       }
       this.barSeries = [{
-        name: '景区数量',
+        name: '岗位数量',
         data: counts
       }]
     }
@@ -272,5 +292,12 @@ export default {
   .list-section {
     order: 1;
   }
+}
+
+.skeleton-wrapper {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 </style>

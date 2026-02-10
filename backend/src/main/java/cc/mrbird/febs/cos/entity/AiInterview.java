@@ -53,7 +53,6 @@ public class AiInterview implements Serializable {
     /**
      * 分数
      */
-    @TableField(exist = false)
     private Integer score;
 
     /**

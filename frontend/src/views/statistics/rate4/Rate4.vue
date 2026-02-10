@@ -3,48 +3,59 @@
   <div class="rate-container" style="width: 100%;">
     <div class="chart-area">
       <!-- 左侧图表区域 -->
-      <div class="chart-section">
-        <!-- 柱状图 -->
-        <div class="chart-card">
-          <h3>价格区间景区数量统计</h3>
-          <apexchart
-            type="bar"
-            :options="barChartOptions"
-            :series="barSeries"
-            height="400"
-          ></apexchart>
-        </div>
 
-        <!-- 饼图 -->
-        <div class="chart-card">
-          <h3>价格区间分布</h3>
-          <apexchart
-            type="pie"
-            :options="pieChartOptions"
-            :series="pieSeries"
-            height="400"
-          ></apexchart>
+      <div class="chart-section">
+        <!-- 数据加载完成后的图表 -->
+        <div>
+          <div class="chart-card">
+            <h3>价格区间数量统计</h3>
+            <a-skeleton v-if="loading" active />
+            <apexchart
+              v-else
+              type="bar"
+              :options="barChartOptions"
+              :series="barSeries"
+              height="400"
+            ></apexchart>
+          </div>
+          <div class="chart-card">
+            <h3>价格区间分布</h3>
+            <a-skeleton v-if="loading" active />
+            <apexchart
+              v-else
+              type="pie"
+              :options="pieChartOptions"
+              :series="pieSeries"
+              height="300"
+            ></apexchart>
+          </div>
         </div>
       </div>
 
       <!-- 右侧列表区域 -->
+
       <div class="list-section">
-        <h3>价格区间详细统计</h3>
-        <div class="price-list">
-          <div
-            v-for="(item, index) in priceData"
-            :key="index"
-            class="price-item"
-          >
-            <div class="price-info">
-              <span class="price-range">价格区间: {{ item.range }}元</span>
-              <span class="price-count">{{ item.count }} 个</span>
-            </div>
-            <div class="progress-bar">
-              <div
-                class="progress-fill"
-                :style="{ width: `${(item.count / maxCount) * 100}%` }"
-              ></div>
+        <!-- 加载中 Skeleton -->
+        <a-skeleton v-if="loading" active />
+        <!-- 数据加载完成后的列表 -->
+        <div v-else>
+          <h3>价格区间详细统计</h3>
+          <div class="price-list">
+            <div
+              v-for="(item, index) in priceData"
+              :key="index"
+              class="price-item"
+            >
+              <div class="price-info">
+                <span class="price-range">价格区间: {{ item.range }}元</span>
+                <span class="price-count">{{ item.count }} 个</span>
+              </div>
+              <div class="progress-bar">
+                <div
+                  class="progress-fill"
+                  :style="{ width: `${(item.count / maxCount) * 100}%` }"
+                ></div>
+              </div>
             </div>
           </div>
         </div>
@@ -57,8 +68,9 @@
 
 export default {
   name: 'Rate4',
-  data() {
+  data () {
     return {
+      loading: true,
       priceData: [],
       maxCount: 0,
       barChartOptions: {
@@ -73,11 +85,11 @@ export default {
         },
         yaxis: {
           title: {
-            text: '景区数量'
+            text: '数量'
           }
         },
         title: {
-          text: '景区价格区间统计',
+          text: '价格区间统计',
           align: 'left'
         },
         plotOptions: {
@@ -89,43 +101,40 @@ export default {
         }
       },
       barSeries: [{
-        name: '景区数量',
+        name: '数量',
         data: []
       }],
       pieChartOptions: {
         chart: {
           id: 'pie-chart'
         },
-        labels: [],
+        labels: [], // 用于显示价格区间
         title: {
           text: '价格区间分布',
           align: 'center'
         },
-        responsive: [{
-          breakpoint: 480,
-          options: {
-            chart: {
-              width: 200
-            },
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }]
+        legend: {
+          position: 'bottom'
+        }
       },
-      pieSeries: []
+      pieSeries: [] // 饼图数据
     }
   },
-  mounted() {
+  mounted () {
     this.selectRate()
   },
   methods: {
-    selectRate() {
+    selectRate () {
+      this.loading = true // 开始加载时显示 Skeleton
       this.$get(`/cos/interview-info/queryPriceStepRate`).then((r) => {
         this.priceData = r.data.data
         this.processData()
+        setTimeout(() => {
+          this.loading = false
+        }, 500) // 数据加载完成隐藏 Skeleton
       }).catch(error => {
         console.error('请求价格区间数据出错:', error)
+        this.loading = false // 出错时也隐藏 Skeleton
       })
     },
 
@@ -155,16 +164,16 @@ export default {
         }
       }
       this.barSeries = [{
-        name: '景区数量',
+        name: '数量',
         data: counts
       }]
 
       // 更新饼图数据
       this.pieChartOptions = {
         ...this.pieChartOptions,
-        labels: ranges
+        labels: ranges // 设置饼图的标签
       }
-      this.pieSeries = counts
+      this.pieSeries = counts // 设置饼图的数据
     }
   }
 }

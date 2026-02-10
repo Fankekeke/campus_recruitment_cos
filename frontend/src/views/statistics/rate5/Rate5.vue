@@ -4,7 +4,7 @@
     <div class="content-area">
       <!-- 左侧词云图 -->
       <div class="wordcloud-section">
-        <h3>景区评论词云图</h3>
+        <h3>岗位词云图</h3>
         <div class="wordcloud-container" ref="wordcloudContainer">
           <div
             v-for="(item, index) in wordcloudData"

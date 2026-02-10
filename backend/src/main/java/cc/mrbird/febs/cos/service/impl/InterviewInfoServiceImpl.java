@@ -229,8 +229,19 @@ public class InterviewInfoServiceImpl extends ServiceImpl<InterviewInfoMapper, I
         result.put("salePriceRank", salePriceRank);
         // 销售岗位分类
         LinkedHashMap<String, Integer> saleTypeRankMapCopy = new LinkedHashMap<>();
+        Map<String, String> academicMapping = new HashMap<>();
+        academicMapping.put("1", "小学");
+        academicMapping.put("2", "初中");
+        academicMapping.put("3", "高中");
+        academicMapping.put("4", "大专");
+        academicMapping.put("5", "本科");
+        academicMapping.put("6", "硕士");
+        academicMapping.put("7", "博士");
+        academicMapping.put("8", "不限");
+
         for (String level : scenicTypeList) {
-            saleTypeRankMapCopy.put(level, saleTypeRankMap.get(level) == null ? 0 : saleTypeRankMap.get(level));
+            String chineseLevel = academicMapping.getOrDefault(level, "未知");
+            saleTypeRankMapCopy.put(chineseLevel, saleTypeRankMap.get(level) == null ? 0 : saleTypeRankMap.get(level));
         }
         result.put("saleTypeRankMapCopy", saleTypeRankMapCopy);
         return result;
@@ -357,8 +368,19 @@ public class InterviewInfoServiceImpl extends ServiceImpl<InterviewInfoMapper, I
         // 销售岗位分类
         LinkedHashMap<String, Integer> saleTypeRankMapCopy = new LinkedHashMap<>();
         List<String> scenicTypeList = Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8");
+        Map<String, String> academicMapping = new HashMap<>();
+        academicMapping.put("1", "小学");
+        academicMapping.put("2", "初中");
+        academicMapping.put("3", "高中");
+        academicMapping.put("4", "大专");
+        academicMapping.put("5", "本科");
+        academicMapping.put("6", "硕士");
+        academicMapping.put("7", "博士");
+        academicMapping.put("8", "不限");
+
         for (String level : scenicTypeList) {
-            saleTypeRankMapCopy.put(level, saleTypeRankMap.get(level) == null ? 0 : saleTypeRankMap.get(level));
+            String chineseLevel = academicMapping.getOrDefault(level, "未知");
+            saleTypeRankMapCopy.put(chineseLevel, saleTypeRankMap.get(level) == null ? 0 : saleTypeRankMap.get(level));
         }
         result.put("saleTypeRankMapCopy", saleTypeRankMapCopy);
         return result;

@@ -4,50 +4,59 @@
     <div class="chart-area">
       <!-- 左侧图表区域 -->
       <div class="chart-section">
-        <!-- 饼图 -->
-        <div class="chart-card">
-          <h3>景区等级分布</h3>
-          <apexchart
-            type="pie"
-            :options="pieChartOptions"
-            :series="pieSeries"
-            height="400"
-          ></apexchart>
-        </div>
-
-        <!-- 柱状图 -->
-        <div class="chart-card">
-          <h3>景区等级数量统计</h3>
-          <apexchart
-            type="bar"
-            :options="barChartOptions"
-            :series="barSeries"
-            height="400"
-          ></apexchart>
+        <!-- 数据加载完成后的图表 -->
+        <div>
+          <div class="chart-card">
+            <h3>岗位等级分布</h3>
+            <a-skeleton v-if="loading" active />
+            <apexchart
+              v-else
+              type="pie"
+              :options="pieChartOptions"
+              :series="pieSeries"
+              height="400"
+            ></apexchart>
+          </div>
+          <div class="chart-card">
+            <h3>岗位等级数量统计</h3>
+            <a-skeleton v-if="loading" active />
+            <apexchart
+              v-else
+              type="bar"
+              :options="barChartOptions"
+              :series="barSeries"
+              height="400"
+            ></apexchart>
+          </div>
         </div>
       </div>
 
       <!-- 右侧列表区域 -->
+
       <div class="list-section">
-        <h3>景区等级详细统计</h3>
-        <div class="level-list">
-          <div
-            v-for="(item, index) in levelData"
-            :key="index"
-            class="level-item"
-          >
-            <div class="level-info">
-              <span class="level-name">{{ item.level }}</span>
-              <div class="level-details">
-                <span class="level-count">{{ item.count }} 个</span>
-                <span class="level-percentage">{{ (item.percentage * 100).toFixed(2) }}%</span>
+        <!-- 数据加载完成后的列表 -->
+        <a-skeleton v-if="loading" active />
+        <div v-else>
+          <h3>岗位等级详细统计</h3>
+          <div class="level-list">
+            <div
+              v-for="(item, index) in levelData"
+              :key="index"
+              class="level-item"
+            >
+              <div class="level-info">
+                <span class="level-name">{{ item.level }}</span>
+                <div class="level-details">
+                  <span class="level-count">{{ item.count }} 个</span>
+                  <span class="level-percentage">{{ (item.percentage).toFixed(2) }}%</span>
+                </div>
               </div>
-            </div>
-            <div class="progress-bar">
-              <div
-                class="progress-fill"
-                :style="{ width: `${item.percentage * 100}%` }"
-              ></div>
+              <div class="progress-bar">
+                <div
+                  class="progress-fill"
+                  :style="{ width: `${item.percentage * 100}%` }"
+                ></div>
+              </div>
             </div>
           </div>
         </div>
@@ -62,29 +71,22 @@ export default {
   name: 'Rate3',
   data() {
     return {
-      levelData: [],
       pieChartOptions: {
         chart: {
-          id: 'pie-chart'
+          type: 'pie'
         },
-        labels: [],
+        labels: [], // 饼图的标签
         title: {
-          text: '景区等级分布',
+          text: '岗位等级分布',
           align: 'center'
         },
-        responsive: [{
-          breakpoint: 480,
-          options: {
-            chart: {
-              width: 200
-            },
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }]
+        legend: {
+          position: 'bottom'
+        }
       },
-      pieSeries: [],
+      pieSeries: [], // 饼图的数据系列
+      loading: true,
+      levelData: [],
       barChartOptions: {
         chart: {
           id: 'bar-chart'
@@ -92,7 +94,7 @@ export default {
         xaxis: {
           categories: [],
           title: {
-            text: '景区等级'
+            text: '岗位等级'
           }
         },
         yaxis: {
@@ -101,7 +103,7 @@ export default {
           }
         },
         title: {
-          text: '景区等级数量统计',
+          text: '岗位等级数量统计',
           align: 'left'
         },
         plotOptions: {
@@ -123,12 +125,17 @@ export default {
   },
   methods: {
     selectRate() {
+      this.loading = true; // 开始加载时显示 Skeleton
       this.$get(`/cos/interview-info/queryScenicLevelRate`).then((r) => {
-        this.levelData = r.data.data
-        this.processData()
+        this.levelData = r.data.data;
+        this.processData();
+        setTimeout(() => {
+          this.loading = false;
+        }, 300) // 数据加载完成隐藏 Skeleton
       }).catch(error => {
-        console.error('请求景区等级数据出错:', error)
-      })
+        console.error('请求岗位等级数据出错:', error);
+        this.loading = false; // 出错时也隐藏 Skeleton
+      });
     },
 
     processData() {
@@ -136,20 +143,13 @@ export default {
       const levels = this.levelData.map(item => item.level)
       const counts = this.levelData.map(item => item.count)
 
-      // 更新饼图数据
-      this.pieChartOptions = {
-        ...this.pieChartOptions,
-        labels: levels
-      }
-      this.pieSeries = counts
-
       // 更新柱状图数据
       this.barChartOptions = {
         ...this.barChartOptions,
         xaxis: {
           categories: levels,
           title: {
-            text: '景区等级'
+            text: '岗位等级'
           }
         }
       }
@@ -157,6 +157,10 @@ export default {
         name: '景区数量',
         data: counts
       }]
+
+      // 更新饼图数据
+      this.pieChartOptions.labels = levels;
+      this.pieSeries = counts;
     }
   }
 }
