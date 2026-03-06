@@ -81,4 +81,19 @@ public interface IInterviewInfoService extends IService<InterviewInfo> {
      * @return 订单词云
      */
     List<LinkedHashMap<String, Object>> queryOrderWordCloud();
+
+    /**
+     * 就业率和就业去向进行统计
+     *
+     * @return 结果
+     */
+    LinkedHashMap<String, Object> queryEmploymentRate();
+
+    /**
+     * 获取学生详情
+     *
+     * @param expertId 学生ID
+     * @return 详情
+     */
+    LinkedHashMap<String, Object> queryDetailByExpertId(Integer expertId);
 }

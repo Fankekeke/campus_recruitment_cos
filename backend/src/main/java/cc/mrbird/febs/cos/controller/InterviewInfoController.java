@@ -261,4 +261,25 @@ public class InterviewInfoController {
     public R queryOrderWordCloud() {
         return R.ok(interviewInfoService.queryOrderWordCloud());
     }
+
+    /**
+     * 就业率和就业去向进行统计
+     *
+     * @return 结果
+     */
+    @GetMapping("/queryEmploymentRate")
+    public R queryEmploymentRate() {
+        return R.ok(interviewInfoService.queryEmploymentRate());
+    }
+
+    /**
+     * 获取学生详情
+     *
+     * @param expertId 学生ID
+     * @return 详情
+     */
+    @GetMapping("/queryDetailByExpertId")
+    public R queryDetailByExpertId(Integer expertId) {
+        return R.ok(interviewInfoService.queryDetailByExpertId(expertId));
+    }
 }

@@ -33,6 +33,14 @@ public class InterviewInfoServiceImpl extends ServiceImpl<InterviewInfoMapper, I
 
     private final IEnterpriseInfoService enterpriseInfoService;
 
+    private final IExpertInfoService expertInfoService;
+
+    private final IEmploymentDestinationsService employmentDestinationsService;
+
+    private final IEmploymentEvidenceService employmentEvidenceService;
+
+    private final ITripartiteAgreementsService tripartiteAgreementsService;
+
     private final IBulletinInfoService bulletinInfoService;
 
     private final IPostInfoService postInfoService;
@@ -882,6 +890,231 @@ public class InterviewInfoServiceImpl extends ServiceImpl<InterviewInfoMapper, I
                 .collect(Collectors.toList());
 
         return result;
+    }
+
+    /**
+     * 就业率和就业去向进行统计
+     *
+     * @return 结果
+     */
+    @Override
+    public LinkedHashMap<String, Object> queryEmploymentRate() {
+        List<ExpertInfo> expertInfoList = expertInfoService.list();
+        List<EmploymentDestinations> employmentDestinationsList = employmentDestinationsService.list();
+
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+
+        // 总学生数
+        int totalStudents = expertInfoList.size();
+        // 已就业学生数
+        int employedStudents = employmentDestinationsList.size();
+
+        // 计算就业率
+        double employmentRate = totalStudents > 0 ? (double) employedStudents / totalStudents * 100 : 0;
+
+        // 统计各就业去向类型的数量
+        Map<Integer, Long> typeCountMap = employmentDestinationsList.stream()
+                .collect(Collectors.groupingBy(EmploymentDestinations::getType, Collectors.counting()));
+
+        // 就业类型映射
+        Map<Integer, String> typeMap = new HashMap<>();
+        typeMap.put(1, "签协议就业");
+        typeMap.put(2, "升学");
+        typeMap.put(3, "出国");
+        typeMap.put(4, "创业");
+        typeMap.put(5, "其他");
+
+        // 构建就业去向统计列表
+        List<LinkedHashMap<String, Object>> destinationStats = new ArrayList<>();
+        for (Map.Entry<Integer, Long> entry : typeCountMap.entrySet()) {
+            LinkedHashMap<String, Object> stat = new LinkedHashMap<>();
+            Integer type = entry.getKey();
+            Long count = entry.getValue();
+
+            stat.put("type", type);
+            stat.put("typeName", typeMap.getOrDefault(type, "未知"));
+            stat.put("count", count);
+            stat.put("percentage", employedStudents > 0 ? (double) count / employedStudents * 100 : 0);
+
+            destinationStats.add(stat);
+        }
+
+        // 按数量降序排列
+        destinationStats.sort((a, b) -> Long.compare((Long) b.get("count"), (Long) a.get("count")));
+
+        // 统计各城市的就业分布
+        Map<String, Long> cityCountMap = employmentDestinationsList.stream()
+                .filter(e -> StrUtil.isNotEmpty(e.getCity()))
+                .collect(Collectors.groupingBy(EmploymentDestinations::getCity, Collectors.counting()));
+
+        // 构建城市统计列表
+        List<LinkedHashMap<String, Object>> cityStats = new ArrayList<>();
+        for (Map.Entry<String, Long> entry : cityCountMap.entrySet()) {
+            LinkedHashMap<String, Object> stat = new LinkedHashMap<>();
+            stat.put("city", entry.getKey());
+            stat.put("count", entry.getValue());
+            stat.put("percentage", employedStudents > 0 ? (double) entry.getValue() / employedStudents * 100 : 0);
+
+            cityStats.add(stat);
+        }
+        // 按数量降序排列
+        cityStats.sort((a, b) -> Long.compare((Long) b.get("count"), (Long) a.get("count")));
+        // 取前 10 个城市
+        List<LinkedHashMap<String, Object>> topCities = cityStats.stream()
+                .limit(10)
+                .collect(Collectors.toList());
+
+        // 组装结果
+        result.put("totalStudents", totalStudents);
+        result.put("employedStudents", employedStudents);
+        result.put("unemployedStudents", totalStudents - employedStudents);
+        result.put("employmentRate", employmentRate);
+        result.put("destinationStats", destinationStats);
+        result.put("cityStats", topCities);
+
+        return result;
+    }
+
+    /**
+     * 获取学生详情
+     *
+     * @param expertId 学生ID
+     * @return 详情
+     */
+    @Override
+    public LinkedHashMap<String, Object> queryDetailByExpertId(Integer expertId) {
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+
+        if (expertId == null) {
+            result.put("code", "ERROR");
+            result.put("message", "学生 ID 不能为空");
+            return result;
+        }
+
+        // 1. 查询学生基本信息
+        ExpertInfo expertInfo = expertInfoService.getById(expertId);
+        if (expertInfo == null) {
+            result.put("code", "ERROR");
+            result.put("message", "未找到该学生信息");
+            return result;
+        }
+
+        // 2. 查询就业去向信息
+        EmploymentDestinations employmentDestinations = employmentDestinationsService.getOne(
+                Wrappers.<EmploymentDestinations>lambdaQuery()
+                        .eq(EmploymentDestinations::getStudentId, expertId)
+        );
+
+        // 3. 查询就业证明材料
+        List<EmploymentEvidence> evidenceList = employmentEvidenceService.list(
+                Wrappers.<EmploymentEvidence>lambdaQuery()
+                        .eq(EmploymentEvidence::getStudentId, expertId)
+        );
+
+        // 4. 查询三方协议信息
+        TripartiteAgreements tripartiteAgreements = tripartiteAgreementsService.getOne(
+                Wrappers.<TripartiteAgreements>lambdaQuery()
+                        .eq(TripartiteAgreements::getStudentId, expertId)
+        );
+
+        // 组装学生基本信息
+        LinkedHashMap<String, Object> studentInfo = new LinkedHashMap<>();
+        studentInfo.put("id", expertInfo.getId());
+        studentInfo.put("name", expertInfo.getName());
+        studentInfo.put("sex", expertInfo.getSex());
+        studentInfo.put("nationality", expertInfo.getNationality());
+        studentInfo.put("politicalStatus", expertInfo.getPoliticalStatus());
+        studentInfo.put("nativePlace", expertInfo.getNativePlace());
+        studentInfo.put("birthDate", expertInfo.getBirthDate());
+        studentInfo.put("images", expertInfo.getImages());
+        studentInfo.put("phone", expertInfo.getPhone());
+        studentInfo.put("mail", expertInfo.getMail());
+        studentInfo.put("address", expertInfo.getAddress());
+        studentInfo.put("schoolName", expertInfo.getSchoolName());
+        studentInfo.put("graduateTime", expertInfo.getGraduateTime());
+        studentInfo.put("educatio", expertInfo.getEducatio());
+        studentInfo.put("employer", expertInfo.getEmployer());
+        studentInfo.put("position", expertInfo.getPosition());
+        studentInfo.put("profile", expertInfo.getProfile());
+
+        // 就业去向信息
+        LinkedHashMap<String, Object> destinationInfo = null;
+        if (employmentDestinations != null) {
+            destinationInfo = new LinkedHashMap<>();
+            destinationInfo.put("id", employmentDestinations.getId());
+            destinationInfo.put("type", employmentDestinations.getType());
+            destinationInfo.put("typeName", getEmploymentTypeName(employmentDestinations.getType()));
+            destinationInfo.put("companyName", employmentDestinations.getCompanyName());
+            destinationInfo.put("organizationCode", employmentDestinations.getOrganizationCode());
+            destinationInfo.put("city", employmentDestinations.getCity());
+            destinationInfo.put("createTime", employmentDestinations.getCreateTime());
+        }
+
+        // 就业证明材料列表
+        List<LinkedHashMap<String, Object>> evidenceInfoList = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(evidenceList)) {
+            for (EmploymentEvidence evidence : evidenceList) {
+                LinkedHashMap<String, Object> evidenceInfo = new LinkedHashMap<>();
+                evidenceInfo.put("id", evidence.getId());
+                evidenceInfo.put("materialType", evidence.getMaterialType());
+                evidenceInfo.put("fileUrl", evidence.getFileUrl());
+                evidenceInfo.put("remark", evidence.getRemark());
+                evidenceInfo.put("createTime", evidence.getCreateTime());
+                evidenceInfoList.add(evidenceInfo);
+            }
+        }
+
+        // 三方协议信息
+        LinkedHashMap<String, Object> agreementInfo = null;
+        if (tripartiteAgreements != null) {
+            agreementInfo = new LinkedHashMap<>();
+            agreementInfo.put("id", tripartiteAgreements.getId());
+            agreementInfo.put("agreementNo", tripartiteAgreements.getAgreementNo());
+            agreementInfo.put("enterpriseName", tripartiteAgreements.getEnterpriseName());
+            agreementInfo.put("signDate", tripartiteAgreements.getSignDate());
+            agreementInfo.put("fileUrl", tripartiteAgreements.getFileUrl());
+            agreementInfo.put("uploadTime", tripartiteAgreements.getUploadTime());
+        }
+
+        // 判断是否已就业
+        boolean isEmployed = employmentDestinations != null;
+
+        // 组装返回结果
+        result.put("code", "SUCCESS");
+        result.put("message", "查询成功");
+        result.put("isEmployed", isEmployed);
+        result.put("studentInfo", studentInfo);
+        result.put("destinationInfo", destinationInfo);
+        result.put("evidenceList", evidenceInfoList);
+        result.put("agreementInfo", agreementInfo);
+
+        return result;
+    }
+
+    /**
+     * 获取就业类型名称
+     *
+     * @param type 就业类型编码
+     * @return 就业类型名称
+     */
+    private String getEmploymentTypeName(Integer type) {
+        if (type == null) {
+            return "未知";
+        }
+        switch (type) {
+            case 1:
+                return "签协议就业";
+            case 2:
+                return "升学";
+            case 3:
+                return "出国";
+            case 4:
+                return "创业";
+            case 5:
+                return "其他";
+            default:
+                return "未知";
+        }
     }
 
     /**
