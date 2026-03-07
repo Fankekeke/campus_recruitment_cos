@@ -1,10 +1,17 @@
 package cc.mrbird.febs.cos.controller;
 
 
+import cc.mrbird.febs.common.exception.FebsException;
 import cc.mrbird.febs.common.utils.FileDownloadUtils;
 import cc.mrbird.febs.common.utils.R;
+import cc.mrbird.febs.cos.entity.EmploymentDestinations;
+import cc.mrbird.febs.cos.entity.EmploymentEvidence;
 import cc.mrbird.febs.cos.entity.ExpertInfo;
+import cc.mrbird.febs.cos.entity.TripartiteAgreements;
+import cc.mrbird.febs.cos.service.IEmploymentDestinationsService;
+import cc.mrbird.febs.cos.service.IEmploymentEvidenceService;
 import cc.mrbird.febs.cos.service.IExpertInfoService;
+import cc.mrbird.febs.cos.service.ITripartiteAgreementsService;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -14,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -27,6 +35,12 @@ import java.util.List;
 public class ExpertInfoController {
 
     private final IExpertInfoService expertInfoService;
+
+    private final IEmploymentDestinationsService employmentDestinationsService;
+
+    private final IEmploymentEvidenceService employmentEvidenceService;
+
+    private final ITripartiteAgreementsService tripartiteAgreementsService;
 
     /**
      * 分页获取学生信息信息
@@ -49,6 +63,24 @@ public class ExpertInfoController {
                 .like(StrUtil.isNotEmpty(key), ExpertInfo::getPosition, key).or()
                 .like(StrUtil.isNotEmpty(key), ExpertInfo::getLevelOne, key).or()
                 .like(StrUtil.isNotEmpty(key), ExpertInfo::getLevelTwo, key).eq(ExpertInfo::getOpenFlag, 1)));
+    }
+
+    /**
+     * 查询学生信息信息详情
+     *
+     * @param userId 用户ID
+     * @return 详情
+     */
+    @GetMapping("/queryExpertDetail")
+    public R queryExpertDetail(Integer userId) throws FebsException {
+        LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>() {
+            {
+                put("employmentDestinations", employmentDestinationsService.getOne(Wrappers.<EmploymentDestinations>lambdaQuery().eq(EmploymentDestinations::getStudentId, userId)));
+                put("employmentEvidence", employmentEvidenceService.getOne(Wrappers.<EmploymentEvidence>lambdaQuery().eq(EmploymentEvidence::getStudentId, userId)));
+                put("tripartiteAgreements", tripartiteAgreementsService.getOne(Wrappers.<TripartiteAgreements>lambdaQuery().eq(TripartiteAgreements::getStudentId, userId)));
+            }
+        };
+        return R.ok(result);
     }
 
     /**

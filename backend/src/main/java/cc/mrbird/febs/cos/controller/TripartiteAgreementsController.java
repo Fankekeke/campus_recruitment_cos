@@ -95,6 +95,8 @@ public class TripartiteAgreementsController {
      */
     @PostMapping("/update")
     public R edit(TripartiteAgreements tripartiteAgreements) {
+        ExpertInfo expertInfo = expertInfoService.getOne(Wrappers.<ExpertInfo>lambdaQuery().eq(ExpertInfo::getUserId, tripartiteAgreements.getStudentId()));
+        tripartiteAgreements.setStudentId(Long.valueOf(expertInfo.getId()));
         return R.ok(tripartiteAgreementsService.updateById(tripartiteAgreements));
     }
 

@@ -96,6 +96,8 @@ public class EmploymentEvidenceController {
      */
     @PostMapping("/update")
     public R edit(EmploymentEvidence employmentEvidence) {
+        ExpertInfo expertInfo = expertInfoService.getOne(Wrappers.<ExpertInfo>lambdaQuery().eq(ExpertInfo::getUserId, employmentEvidence.getStudentId()));
+        employmentEvidence.setStudentId(Long.valueOf(expertInfo.getId()));
         return R.ok(employmentEvidenceService.updateById(employmentEvidence));
     }
 

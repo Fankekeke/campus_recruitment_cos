@@ -98,6 +98,8 @@ public class EmploymentDestinationsController {
      */
     @PostMapping("/update")
     public R edit(EmploymentDestinations employmentDestinations) {
+        ExpertInfo expertInfo = expertInfoService.getOne(Wrappers.<ExpertInfo>lambdaQuery().eq(ExpertInfo::getUserId, employmentDestinations.getStudentId()));
+        employmentDestinations.setStudentId(Long.valueOf(expertInfo.getId()));
         return R.ok(employmentDestinationsService.updateById(employmentDestinations));
     }
 

@@ -4,8 +4,29 @@
       <a-col :span="24" style="margin-top: 30px">
         <p style="font-size: 30px;font-family: SimHei;font-weight: 500">欢迎使用校园工作招聘平台</p>
       </a-col>
-      <a-col :span="24" style="text-align: center">
-        <img alt="example" style="width: 55%;" src="/static/img/manages.png"/>
+      <a-col :span="12" style="text-align: center">
+        <img alt="example" style="width: 80%;" src="/static/img/manages.png"/>
+      </a-col>
+      <a-col :span="12" style="text-align: center">
+        <a-spin :spinning="dataLoading">
+          <a-card hoverable :loading="loading" :bordered="false" title="公告信息" style="margin-top: 15px">
+            <div style="padding: 0 22px">
+              <a-list item-layout="vertical" :pagination="pagination" :data-source="bulletinList">
+                <a-list-item slot="renderItem" key="item.title" slot-scope="item, index">
+                  <template slot="actions">
+                      <span key="message">
+                        <a-icon type="message" style="margin-right: 8px" />
+                        {{ item.date }}
+                      </span>
+                  </template>
+                  <a-list-item-meta :description="item.content" style="font-size: 14px">
+                    <a slot="title">{{ item.title }}</a>
+                  </a-list-item-meta>
+                </a-list-item>
+              </a-list>
+            </div>
+          </a-card>
+        </a-spin>
       </a-col>
     </a-row>
   </a-card>
@@ -24,11 +45,19 @@ export default {
   name: 'Work',
   data () {
     return {
+      pagination: {
+        onChange: page => {
+          console.log(page)
+        },
+        pageSize: 3
+      },
       form: this.$form.createForm(this),
       formItemLayout,
+      dataLoading: false,
       visible: false,
       statusList: [],
       vehicleList: [],
+      bulletinList: [],
       newsContent: '',
       newsPage: 0,
       loading: false,
@@ -44,8 +73,16 @@ export default {
     })
   },
   mounted () {
+    this.queryBulletinDetail()
   },
   methods: {
+    queryBulletinDetail () {
+      this.dataLoading = true
+      this.$get(`/cos/bulletin-info/list`).then((r) => {
+        this.bulletinList = r.data.data
+        this.dataLoading = false
+      })
+    },
     newsNext () {
       if (this.newsPage + 1 === this.newsList.length) {
         this.newsPage = 0
@@ -59,7 +96,7 @@ export default {
       this.visible = false
     },
     selectBulletinDetail () {
-      this.$get(`/cos/user-info/selectBulletinDetail/${this.currentUser.userId}`).then((r) => {
+      this.$get(`/cos/export-info/selectBulletinDetail/${this.currentUser.userId}`).then((r) => {
         this.userInfo = r.data.user
         this.newsList = r.data.bulletin
         if (this.newsList.length !== 0) {

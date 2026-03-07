@@ -47,7 +47,6 @@
           {{ expertData.levelOne }}
         </a-col>
       </a-row>
-      <br/>
       <a-row style="padding-left: 24px;padding-right: 24px;">
         <br/>
         <a-col :span="8"><b>出生日期：</b>
@@ -103,6 +102,80 @@
         </a-col>
       </a-row>
       <br/>
+      <!-- 新增：就业去向信息 -->
+      <a-row style="padding-left: 24px;padding-right: 24px;" v-if="employmentDestinations">
+        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">就业去向信息</span></a-col>
+        <a-col :span="8"><b>类型：</b>
+          {{ employmentDestinations.type === 1 ? '就业' : employmentDestinations.type === 2 ? '升学' : '其他' }}
+        </a-col>
+        <a-col :span="8"><b>单位名称：</b>
+          {{ employmentDestinations.companyName }}
+        </a-col>
+        <a-col :span="8"><b>组织机构代码：</b>
+          {{ employmentDestinations.organizationCode }}
+        </a-col>
+      </a-row>
+      <a-row style="padding-left: 24px;padding-right: 24px;margin-top: 15px;" v-if="employmentDestinations">
+        <a-col :span="8"><b>工作城市：</b>
+          {{ employmentDestinations.city }}
+        </a-col>
+        <a-col :span="8"><b>创建时间：</b>
+          {{ employmentDestinations.createTime }}
+        </a-col>
+      </a-row>
+
+      <br/>
+
+      <!-- 新增：三方协议信息 -->
+      <a-row style="padding-left: 24px;padding-right: 24px;" v-if="tripartiteAgreements">
+        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">三方协议信息</span></a-col>
+        <a-col :span="8"><b>协议编号：</b>
+          {{ tripartiteAgreements.agreementNo }}
+        </a-col>
+        <a-col :span="8"><b>企业名称：</b>
+          {{ tripartiteAgreements.enterpriseName }}
+        </a-col>
+        <a-col :span="8"><b>签订日期：</b>
+          {{ tripartiteAgreements.signDate }}
+        </a-col>
+      </a-row>
+      <a-row style="padding-left: 24px;padding-right: 24px;margin-top: 15px;" v-if="tripartiteAgreements">
+        <a-col :span="8"><b>上传时间：</b>
+          {{ tripartiteAgreements.uploadTime }}
+        </a-col>
+        <a-col :span="16">
+          <b>协议文件：</b>
+          <a v-if="tripartiteAgreements.fileUrl" @click="previewFile(tripartiteAgreements.fileUrl)" style="color: #1890ff;cursor: pointer;">
+            <a-icon type="file-image" /> 查看协议
+          </a>
+          <span v-else style="color: #999;">未上传</span>
+        </a-col>
+      </a-row>
+
+      <br/>
+
+      <!-- 新增：就业证明材料信息 -->
+      <a-row style="padding-left: 24px;padding-right: 24px;" v-if="employmentEvidence">
+        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">就业证明材料信息</span></a-col>
+        <a-col :span="8"><b>材料类型：</b>
+          {{ employmentEvidence.materialType }}
+        </a-col>
+        <a-col :span="8"><b>上传时间：</b>
+          {{ employmentEvidence.createTime }}
+        </a-col>
+        <a-col :span="8">
+          <b>证明材料：</b>
+          <a v-if="employmentEvidence.fileUrl" @click="previewFile(employmentEvidence.fileUrl)" style="color: #1890ff;cursor: pointer;">
+            <a-icon type="file-image" /> 查看材料
+          </a>
+          <span v-else style="color: #999;">未上传</span>
+        </a-col>
+      </a-row>
+      <a-row style="padding-left: 24px;padding-right: 24px;margin-top: 15px;" v-if="employmentEvidence">
+        <a-col :span="24"><b>备注说明：</b>
+          {{ employmentEvidence.remark || '无' }}
+        </a-col>
+      </a-row>
       <br/>
     </div>
   </a-modal>
@@ -110,6 +183,7 @@
 
 <script>
 import moment from 'moment'
+import {mapState} from 'vuex'
 moment.locale('zh-cn')
 function getBase64 (file) {
   return new Promise((resolve, reject) => {
@@ -131,6 +205,9 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      currentUser: state => state.account.user
+    }),
     show: {
       get: function () {
         return this.expertShow
@@ -144,12 +221,16 @@ export default {
       loading: false,
       fileList: [],
       previewVisible: false,
-      previewImage: ''
+      previewImage: '',
+      employmentDestinations: null,
+      tripartiteAgreements: null,
+      employmentEvidence: null
     }
   },
   watch: {
     expertShow: function (value) {
       if (value) {
+        this.queryExpertDetail()
         if (this.expertData.images !== null && this.expertData.images !== '') {
           this.imagesInit(this.expertData.images)
         }
@@ -157,6 +238,26 @@ export default {
     }
   },
   methods: {
+    queryExpertDetail () {
+      this.$get(`/cos/expert-info/queryExpertDetail`, {
+        userId: this.expertData.id
+      }).then((r) => {
+        console.log(JSON.stringify(r.data))
+        // 存储返回的就业相关数据
+        if (r.data.code === 0) {
+          const data = r.data
+          this.employmentDestinations = data.employmentDestinations || null
+          this.tripartiteAgreements = data.tripartiteAgreements || null
+          this.employmentEvidence = data.employmentEvidence || null
+        }
+      })
+    },
+    previewFile (fileUrl) {
+      // 预览文件，这里假设文件是图片格式
+      if (fileUrl) {
+        window.open(`http://127.0.0.1:9527/imagesWeb/${fileUrl}`, '_blank')
+      }
+    },
     imagesInit (images) {
       if (images !== null && images !== '') {
         let imageList = []

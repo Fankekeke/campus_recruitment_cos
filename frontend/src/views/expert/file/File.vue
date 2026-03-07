@@ -84,7 +84,6 @@
                     name="avatar"
                     action="http://127.0.0.1:9527/file/fileUpload/"
                     :file-list="materialFileList"
-                    @preview="handleMaterialPreview"
                     @change="materialHandleChange"
                     class="material-uploader"
                   >
@@ -148,7 +147,7 @@
                 <!-- 签约时间 -->
                 <a-form-item label="签约时间">
                   <a-date-picker
-                    v-decorator="['signDate']"
+                    v-decorator="['signDate', { rules: [{ required: true, message: '请选择签约时间!' }] }]"
                     format="YYYY-MM-DD"
                     placeholder="请选择签约时间"
                   />
@@ -376,6 +375,9 @@ export default {
       fields.forEach((field) => {
         this.agreementForm.getFieldDecorator(field)
         obj[field] = info[field]
+        if (field === 'signDate') {
+          obj[field] = moment(info[field])
+        }
       })
       this.agreementForm.setFieldsValue(obj)
     },
@@ -404,8 +406,8 @@ export default {
       }
       this.agreementForm.validateFields((err, values) => {
         if (!err) {
+          values.signDate = values.signDate.format('YYYY-MM-DD')
           this.agreementLoading = true
-
           const fileUrl = this.agreementFileList[0].response
           const fileName = this.agreementFileList[0] ? this.agreementFileList[0].name : null
 
