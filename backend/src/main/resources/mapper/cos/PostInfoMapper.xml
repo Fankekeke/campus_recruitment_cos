@@ -97,6 +97,7 @@
         (ed.enterprise_id = ei.id)
         where
         1 = 1
+        and pi.del_flag = 1
         <if test="postInfo.industryName != null and postInfo.industryName != ''">
             AND ii.name LIKE CONCAT('%',#{postInfo.industryName},'%')
         </if>

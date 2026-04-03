@@ -2,10 +2,7 @@ package cc.mrbird.febs.cos.controller;
 
 
 import cc.mrbird.febs.common.utils.R;
-import cc.mrbird.febs.cos.entity.EnterpriseInfo;
-import cc.mrbird.febs.cos.entity.ExpertInfo;
-import cc.mrbird.febs.cos.entity.InterviewInfo;
-import cc.mrbird.febs.cos.entity.NotifyInfo;
+import cc.mrbird.febs.cos.entity.*;
 import cc.mrbird.febs.cos.service.*;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -38,6 +35,8 @@ public class InterviewInfoController {
 
     private final IPostInfoService postInfoService;
 
+    private final IResumeInfoService resumeInfoService;
+
     /**
      * 分页获取所属面试管理信息
      *
@@ -64,6 +63,13 @@ public class InterviewInfoController {
         }
         interviewInfo.setDelFlag(0);
         interviewInfo.setStatus(1);
+
+        // 学生简历
+        ResumeInfo resumeInfo = resumeInfoService.getOne(Wrappers.<ResumeInfo>lambdaQuery().eq(ResumeInfo::getStudentId, expertInfo.getId())
+                .eq(ResumeInfo::getDefaultFlag, "1"));
+        if (resumeInfo != null) {
+            interviewInfo.setResumeId(resumeInfo.getId());
+        }
 
         NotifyInfo notifyInfo = new NotifyInfo();
         notifyInfo.setDelFlag(0);

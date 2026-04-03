@@ -147,15 +147,15 @@ export default {
         customRender: (text, row, index) => {
           switch (text) {
             case 1:
-              return <a-tag>已投递</a-tag>
+              return <a-tag color="blue">已投递</a-tag>
             case 2:
-              return <a-tag>已查看</a-tag>
+              return <a-tag color="cyan">已查看</a-tag>
             case 3:
-              return <a-tag>不符合</a-tag>
+              return <a-tag color="red">不符合</a-tag>
             case 4:
-              return <a-tag>邀约面试</a-tag>
+              return <a-tag color="orange">邀约面试</a-tag>
             case 5:
-              return <a-tag>面试结束</a-tag>
+              return <a-tag color="green">面试通过</a-tag>
             default:
               return '- -'
           }
@@ -229,15 +229,15 @@ export default {
         customRender: (text, row, index) => {
           switch (text) {
             case 1:
-              return <a-tag>已投递</a-tag>
+              return <a-tag color="blue">已投递</a-tag>
             case 2:
-              return <a-tag>已查看</a-tag>
+              return <a-tag color="cyan">已查看</a-tag>
             case 3:
-              return <a-tag>不符合</a-tag>
+              return <a-tag color="red">不符合</a-tag>
             case 4:
-              return <a-tag>邀约面试</a-tag>
+              return <a-tag color="orange">邀约面试</a-tag>
             case 5:
-              return <a-tag>面试结束</a-tag>
+              return <a-tag color="green">面试通过</a-tag>
             default:
               return '- -'
           }

@@ -149,9 +149,18 @@ export default {
     }),
     columns () {
       return [{
-        title: '岗位编号',
-        dataIndex: 'code',
-        ellipsis: true
+        title: '状态',
+        dataIndex: 'delFlag',
+        customRender: (text, row, index) => {
+          switch (text) {
+            case 1:
+              return <a-tag color="green">上架</a-tag>
+            case 0:
+              return <a-tag color="red">下架</a-tag>
+            default:
+              return '- -'
+          }
+        }
       }, {
         title: '岗位名称',
         dataIndex: 'postName',

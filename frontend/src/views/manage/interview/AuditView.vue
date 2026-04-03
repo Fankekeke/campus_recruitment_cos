@@ -95,6 +95,18 @@
       </a-row>
       <br/>
     </div>
+    <div style="font-size: 13px;font-family: SimHei" v-if="pluralismData !== null">
+      <a-row style="padding-left: 24px;padding-right: 24px;">
+        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">简历信息</span></a-col>
+        <a-col :span="8"><b>简历名称：</b>
+          {{ pluralismData.resumeName }}
+        </a-col>
+        <a-col :span="8"><b>简历附件：</b>
+          <a :href="'http://127.0.0.1:9527/imagesWeb/' + pluralismData.fileUrl">{{ pluralismData.fileUrl }}</a>
+        </a-col>
+      </a-row>
+    </div>
+    <br/>
     <div style="font-size: 13px;font-family: SimHei" v-if="pluralismInfo">
       <a-row style="padding-left: 24px;padding-right: 24px;">
         <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">兼职信息</span></a-col>

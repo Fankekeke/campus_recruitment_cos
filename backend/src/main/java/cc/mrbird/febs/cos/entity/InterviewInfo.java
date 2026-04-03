@@ -77,4 +77,6 @@ public class InterviewInfo implements Serializable {
 
     @TableField(exist = false)
     private Integer day;
+
+    private Integer resumeId;
 }

@@ -202,7 +202,7 @@ public class PostInfoServiceImpl extends ServiceImpl<PostInfoMapper, PostInfo> i
 
         if (expertInfo == null) {
             // 如果没有找到用户画像，默认返回最新发布的10个岗位
-            List<PostInfo> postInfoList = this.list(Wrappers.<PostInfo>lambdaQuery()
+            List<PostInfo> postInfoList = this.list(Wrappers.<PostInfo>lambdaQuery().eq(PostInfo::getDelFlag, 1)
                     .orderByDesc(PostInfo::getCreateDate)
                     .last("limit 10"));
             if (CollectionUtil.isEmpty(postInfoList)) {
@@ -223,7 +223,7 @@ public class PostInfoServiceImpl extends ServiceImpl<PostInfoMapper, PostInfo> i
                 ? wordSegmentationService.segment(expertInfo.getLevelTwo()) : Collections.emptyList();
 
         // 构建分词后的动态查询条件
-        List<PostInfo> postInfoList = this.list(Wrappers.<PostInfo>lambdaQuery()
+        List<PostInfo> postInfoList = this.list(Wrappers.<PostInfo>lambdaQuery().eq(PostInfo::getDelFlag, 1)
                 // 职位名称和职责中匹配分词后的关键词
                 .and(!positionKeywords.isEmpty(), wrapper -> {
                     for (String keyword : positionKeywords) {

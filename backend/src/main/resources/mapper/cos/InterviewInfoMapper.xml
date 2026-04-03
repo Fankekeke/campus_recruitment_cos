@@ -8,6 +8,7 @@
         ini.id,
         ini.expert_id,
         ini.base_id,
+        ini.resume_id,
         ini.`type`,
         ini.create_date,
         ini.enterprise_id,
@@ -32,7 +33,9 @@
         post_info.work_require,
         post_info.salary,
         post_info.welfare,
-        evaluate_info.id as evaluateId
+        evaluate_info.id as evaluateId,
+        ri2.name as resumeName,
+        ri2.file_url
         from
         interview_info ini
         left join expert_info ei on
@@ -41,6 +44,8 @@
         (ei2.id = ini.enterprise_id)
         left join enterprise_detail ed on
         (ed.enterprise_id = ei2.id)
+        left join resume_info ri2 on
+        (ri2.id = ini.resume_id)
         left join post_info on (post_info.id = ini.base_id)
         left join evaluate_info on (evaluate_info.interview_id = ini.id)
         where
@@ -61,7 +66,7 @@
             AND ei2.user_id = #{interviewInfo.enterpriseId}
         </if>
         order by
-        ini.create_date desc
+        ini.id desc
     </select>
 
     <!-- 根据面试ID获取岗位面试信息 -->
@@ -99,7 +104,7 @@
             #{id}
         </foreach>
         order by
-        ini.create_date desc
+        ini.id desc
     </select>
 
     <select id="selectOrderByMonth" resultType="cc.mrbird.febs.cos.entity.ReserveInfo">
